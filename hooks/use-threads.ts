@@ -11,22 +11,17 @@ interface Thread {
   updated_at: string;
 }
 
-async function fetchThreads(userId: string): Promise<Thread[]> {
-  const res = await fetch("/api/threads", {
-    headers: { "x-user-id": userId },
-  });
+async function fetchThreads(): Promise<Thread[]> {
+  const res = await fetch("/api/threads");
   if (!res.ok) throw new Error("Failed to fetch threads");
   const data = await res.json();
   return data.threads;
 }
 
-async function createThread(userId: string, title?: string): Promise<Thread> {
+async function createThread(title?: string): Promise<Thread> {
   const res = await fetch("/api/threads", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-user-id": userId,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ title }),
   });
   if (!res.ok) throw new Error("Failed to create thread");
@@ -34,34 +29,32 @@ async function createThread(userId: string, title?: string): Promise<Thread> {
   return data.thread;
 }
 
-async function deleteThread(userId: string, threadId: string): Promise<void> {
+async function deleteThread(threadId: string): Promise<void> {
   const res = await fetch(`/api/threads/${threadId}`, {
     method: "DELETE",
-    headers: { "x-user-id": userId },
   });
   if (!res.ok) throw new Error("Failed to delete thread");
 }
 
-export function useThreads(userId: string | undefined) {
+export function useThreads() {
   const queryClient = useQueryClient();
 
   const threadsQuery = useQuery({
-    queryKey: ["threads", userId],
-    queryFn: () => fetchThreads(userId!),
-    enabled: !!userId,
+    queryKey: ["threads"],
+    queryFn: fetchThreads,
   });
 
   const createMutation = useMutation({
-    mutationFn: (title?: string) => createThread(userId!, title),
+    mutationFn: createThread,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["threads", userId] });
+      queryClient.invalidateQueries({ queryKey: ["threads"] });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (threadId: string) => deleteThread(userId!, threadId),
+    mutationFn: deleteThread,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["threads", userId] });
+      queryClient.invalidateQueries({ queryKey: ["threads"] });
     },
   });
 

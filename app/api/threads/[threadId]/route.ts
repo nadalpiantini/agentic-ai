@@ -8,13 +8,11 @@ type RouteParams = { params: Promise<{ threadId: string }> };
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
   const authResult = await requireAuthenticatedUser();
-  if (authResult.error) {
-    return authResult.response!;
+  if (authResult.error || !authResult.user) {
+    return authResult.response ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { user } = authResult;
   const { threadId } = await params;
-
   const supabase = createAdminClient();
 
   // Get thread
@@ -22,7 +20,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     .from("threads")
     .select("*")
     .eq("id", threadId)
-    .eq("user_id", user.id)
+    .eq("user_id", authResult.user.id)
     .single();
 
   if (threadError || !thread) {
@@ -45,20 +43,18 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
   const authResult = await requireAuthenticatedUser();
-  if (authResult.error) {
-    return authResult.response!;
+  if (authResult.error || !authResult.user) {
+    return authResult.response ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { user } = authResult;
   const { threadId } = await params;
-
   const supabase = createAdminClient();
 
   const { error } = await supabase
     .from("threads")
     .delete()
     .eq("id", threadId)
-    .eq("user_id", user.id);
+    .eq("user_id", authResult.user.id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -69,11 +65,10 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
   const authResult = await requireAuthenticatedUser();
-  if (authResult.error) {
-    return authResult.response!;
+  if (authResult.error || !authResult.user) {
+    return authResult.response ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { user } = authResult;
   const { threadId } = await params;
   const body = await req.json();
 
@@ -83,7 +78,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     .from("threads")
     .update({ title: body.title })
     .eq("id", threadId)
-    .eq("user_id", user.id)
+    .eq("user_id", authResult.user.id)
     .select()
     .single();
 

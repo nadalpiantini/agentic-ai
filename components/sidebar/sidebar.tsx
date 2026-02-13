@@ -5,19 +5,17 @@ import { useThreads } from "@/hooks/use-threads";
 import { ThreadItem } from "./thread-item";
 
 interface SidebarProps {
-  userId: string;
   activeThreadId?: string;
   onThreadSelect: (threadId: string) => void;
   onNewThread: (threadId: string) => void;
 }
 
 export function Sidebar({
-  userId,
   activeThreadId,
   onThreadSelect,
   onNewThread,
 }: SidebarProps) {
-  const { threads, isLoading, createThread, deleteThread } = useThreads(userId);
+  const { threads, isLoading, createThread, deleteThread } = useThreads();
 
   const handleNewThread = async () => {
     const thread = await createThread(undefined);

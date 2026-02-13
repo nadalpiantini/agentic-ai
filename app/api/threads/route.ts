@@ -10,8 +10,11 @@ const getHandler = createAPIHandler(
   { method: "GET", path: "/api/threads" },
   async ({ req, requestId, userId }) => {
     const authResult = await requireAuthenticatedUser();
-    if (authResult.error) {
-      return authResult.response!;
+    if (authResult.error || !authResult.user) {
+      return {
+        data: { error: authResult.error || "Unauthorized" },
+        statusCode: 401,
+      };
     }
 
     const supabase = createAdminClient();
@@ -50,8 +53,11 @@ const postHandler = createAPIHandler(
   { method: "POST", path: "/api/threads", requireBody: true },
   async ({ req, requestId, userId }) => {
     const authResult = await requireAuthenticatedUser();
-    if (authResult.error) {
-      return authResult.response!;
+    if (authResult.error || !authResult.user) {
+      return {
+        data: { error: authResult.error || "Unauthorized" },
+        statusCode: 401,
+      };
     }
 
     const supabase = createAdminClient();

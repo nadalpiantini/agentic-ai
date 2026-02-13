@@ -6,7 +6,6 @@ import { Sidebar } from "@/components/sidebar/sidebar";
 import { MobileSidebar } from "@/components/sidebar/mobile-sidebar";
 import { useMobile } from "@/hooks/use-mobile";
 import { useUser } from "@/hooks/use-user";
-import type { User } from "@supabase/supabase-js";
 import { Bot } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {

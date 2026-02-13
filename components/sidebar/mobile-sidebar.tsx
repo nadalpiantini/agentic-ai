@@ -5,7 +5,6 @@ import { Menu, X } from "lucide-react";
 import { Sidebar } from "./sidebar";
 
 interface MobileSidebarProps {
-  userId: string;
   activeThreadId?: string;
   onThreadSelect: (threadId: string) => void;
   onNewThread: (threadId: string) => void;
