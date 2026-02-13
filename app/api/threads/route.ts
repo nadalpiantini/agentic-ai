@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServerClient } from "@supabase/supabase-js";
 import { v5 as uuidv5 } from "uuid";
+import { createAPIHandler } from "@/lib/utils/api-handler";
+import { Logger } from "@/lib/utils/logging";
 
 export const dynamic = "force-dynamic";
 
@@ -18,57 +20,92 @@ function generateUserUUID(userIdString: string): string {
   return uuidv5(userIdString, NAMESPACE);
 }
 
-export async function GET(req: NextRequest) {
-  try {
+const getHandler = createAPIHandler(
+  { method: "GET", path: "/api/threads" },
+  async ({ req, requestId, userId }) => {
     const supabase = createAdminClient();
     const userIdString = req.headers.get("x-user-id") || "default-user";
-    const userId = generateUserUUID(userIdString);
+    const userUUID = generateUserUUID(userIdString);
 
     const { data, error } = await supabase
       .from("threads")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", userUUID)
       .order("updated_at", { ascending: false })
       .limit(50);
 
     if (error) throw error;
 
-    return NextResponse.json({ threads: data });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
-}
+    await Logger.logMetric(
+      {
+        requestId,
+        method: "GET",
+        path: "/api/threads",
+        userId,
+        timestamp: Date.now(),
+      },
+      "threads_retrieved",
+      (data || []).length,
+      "count"
+    );
 
-export async function POST(req: NextRequest) {
-  try {
+    return {
+      data: { threads: data },
+      statusCode: 200,
+    };
+  }
+);
+
+const postHandler = createAPIHandler(
+  { method: "POST", path: "/api/threads", requireBody: true },
+  async ({ req, requestId, userId }) => {
     const supabase = createAdminClient();
     const userIdString = req.headers.get("x-user-id") || "default-user";
-    const userId = generateUserUUID(userIdString);
-    const body = await req.json();
-    const title = body.title || "New Chat";
+    const userUUID = generateUserUUID(userIdString);
 
-    console.log("[POST /api/threads] Creating thread:", { userId, title });
+    let body: Record<string, unknown> = {};
+    try {
+      const text = await req.text();
+      if (text) {
+        body = JSON.parse(text);
+      }
+    } catch (e) {
+      throw new Error("Invalid JSON in request body");
+    }
+
+    const title = (body.title as string) || "New Chat";
 
     const { data, error } = await supabase
       .from("threads")
       .insert({
-        user_id: userId,
+        user_id: userUUID,
         title: title,
       })
       .select()
       .single();
 
-    if (error) {
-      console.error("[POST /api/threads] Supabase error:", error);
-      throw error;
-    }
+    if (error) throw error;
 
-    console.log("[POST /api/threads] Thread created:", data);
-    return NextResponse.json({ thread: data }, { status: 201 });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    console.error("[POST /api/threads] Exception:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Log thread creation event
+    await Logger.logMetric(
+      {
+        requestId,
+        method: "POST",
+        path: "/api/threads",
+        userId,
+        timestamp: Date.now(),
+      },
+      "thread_created",
+      1,
+      "count"
+    );
+
+    return {
+      data: { thread: data },
+      statusCode: 201,
+    };
   }
-}
+);
+
+export const GET = getHandler;
+export const POST = postHandler;
