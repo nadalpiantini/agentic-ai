@@ -189,6 +189,8 @@ describe("ContextStackManager", () => {
     it("should store and retrieve metadata", () => {
       const messages = [new HumanMessage("Test")];
       const frameId = manager.push("thread-1", messages, {
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
         language: "es",
         agentType: "code",
       });

@@ -191,6 +191,12 @@ Run migrations in order against your Supabase project:
 3. `003_create_checkpoints.sql` - LangGraph checkpoint tables
 4. `004_enable_pgvector.sql` - pgvector extension + documents table
 5. `005_create_rls.sql` - Row Level Security policies
+6. `006_create_scheduler.sql` - Autonomous scheduler tables
+
+Or run all at once:
+```bash
+psql $DATABASE_URL < supabase/migrations/ALL_MIGRATIONS.sql
+```
 
 ---
 
