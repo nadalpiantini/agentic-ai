@@ -7,6 +7,10 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #20764 | 10:43 PM | 🔴 | getStats Test Fixed | ~126 |
+| #20761 | 10:42 PM | 🔴 | Environment Variables Mocked for Scheduler Tests | ~140 |
+| #20760 | 10:41 PM | 🔴 | Test Assertion Simplified for getStats | ~128 |
+| #20758 | " | 🔴 | Scheduler Tests Fixed for Database Row Format | ~141 |
 | #20749 | 10:36 PM | 🟣 | Comprehensive Scheduler Unit Tests Implemented | ~154 |
 | #20732 | 10:29 PM | 🔵 | Context Stack Manager Tests Created for Sprint 3 | ~285 |
 | #20728 | 10:28 PM | 🟣 | Comprehensive Agent Type Detection Tests Created | ~331 |

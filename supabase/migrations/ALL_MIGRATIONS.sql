@@ -171,3 +171,37 @@ create policy "Authenticated users can view documents"
 
 -- Checkpoints: no RLS (accessed via service role from server only)
 -- The checkpoint tables use service_role key, so RLS is not needed
+
+-- Migration 006: Create scheduled_tasks table for Autonomous Scheduler
+create table if not exists public.scheduled_tasks (
+  id uuid primary key default gen_random_uuid(),
+  agent_id text not null,
+  thread_id text not null,
+  task_type text not null check (task_type in ('check_in', 'follow_up', 'reminder', 'autonomous')),
+  scheduled_for timestamptz not null,
+  status text not null default 'pending' check (status in ('pending', 'running', 'completed', 'failed', 'cancelled')),
+  payload jsonb,
+  retry_count integer default 0,
+  max_retries integer default 3,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  last_error text
+);
+
+-- Indexes for scheduler performance
+create index if not exists idx_scheduled_tasks_scheduled_for on public.scheduled_tasks(scheduled_for);
+create index if not exists idx_scheduled_tasks_status on public.scheduled_tasks(status);
+create index if not exists idx_scheduled_tasks_thread_id on public.scheduled_tasks(thread_id);
+
+-- Comments for documentation
+comment on table public.scheduled_tasks is 'Autonomous agent task scheduling for time-based and event-based agent actions';
+comment on column public.scheduled_tasks.id is 'Unique task identifier';
+comment on column public.scheduled_tasks.agent_id is 'Agent that should execute this task';
+comment on column public.scheduled_tasks.thread_id is 'Thread context for task execution';
+comment on column public.scheduled_tasks.task_type is 'Type of scheduled task (check_in, follow_up, reminder, autonomous)';
+comment on column public.scheduled_tasks.scheduled_for is 'When the task should be executed';
+comment on column public.scheduled_tasks.status is 'Current task status (pending, running, completed, failed, cancelled)';
+comment on column public.scheduled_tasks.payload is 'Task-specific data (JSON)';
+comment on column public.scheduled_tasks.retry_count is 'Number of retry attempts';
+comment on column public.scheduled_tasks.max_retries is 'Maximum retry attempts before marking as failed';
+comment on column public.scheduled_tasks.last_error is 'Last error message if task failed';
