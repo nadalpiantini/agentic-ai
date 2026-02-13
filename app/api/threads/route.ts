@@ -1,36 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient as createServerClient } from "@supabase/supabase-js";
-import { v5 as uuidv5 } from "uuid";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAuthenticatedUser } from "@/lib/supabase/auth";
 import { createAPIHandler } from "@/lib/utils/api-handler";
 import { Logger } from "@/lib/utils/logging";
 
 export const dynamic = "force-dynamic";
 
-// Create admin client with service role key for server-side operations
-function createAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-  return createServerClient(url, serviceRoleKey);
-}
-
-// Generate consistent UUID from string user ID
-function generateUserUUID(userIdString: string): string {
-  // Use a fixed namespace for consistent UUID generation
-  const NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"; // DNS namespace
-  return uuidv5(userIdString, NAMESPACE);
-}
-
 const getHandler = createAPIHandler(
   { method: "GET", path: "/api/threads" },
   async ({ req, requestId, userId }) => {
+    const authResult = await requireAuthenticatedUser();
+    if (authResult.error) {
+      return authResult.response!;
+    }
+
     const supabase = createAdminClient();
-    const userIdString = req.headers.get("x-user-id") || "default-user";
-    const userUUID = generateUserUUID(userIdString);
+    const { user } = authResult;
 
     const { data, error } = await supabase
       .from("threads")
       .select("*")
-      .eq("user_id", userUUID)
+      .eq("user_id", user.id)
       .order("updated_at", { ascending: false })
       .limit(50);
 
@@ -41,7 +31,7 @@ const getHandler = createAPIHandler(
         requestId,
         method: "GET",
         path: "/api/threads",
-        userId,
+        userId: user.id,
         timestamp: Date.now(),
       },
       "threads_retrieved",
@@ -59,9 +49,13 @@ const getHandler = createAPIHandler(
 const postHandler = createAPIHandler(
   { method: "POST", path: "/api/threads", requireBody: true },
   async ({ req, requestId, userId }) => {
+    const authResult = await requireAuthenticatedUser();
+    if (authResult.error) {
+      return authResult.response!;
+    }
+
     const supabase = createAdminClient();
-    const userIdString = req.headers.get("x-user-id") || "default-user";
-    const userUUID = generateUserUUID(userIdString);
+    const { user } = authResult;
 
     let body: Record<string, unknown> = {};
     try {
@@ -78,7 +72,7 @@ const postHandler = createAPIHandler(
     const { data, error } = await supabase
       .from("threads")
       .insert({
-        user_id: userUUID,
+        user_id: user.id,
         title: title,
       })
       .select()
@@ -92,7 +86,7 @@ const postHandler = createAPIHandler(
         requestId,
         method: "POST",
         path: "/api/threads",
-        userId,
+        userId: user.id,
         timestamp: Date.now(),
       },
       "thread_created",

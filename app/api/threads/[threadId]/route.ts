@@ -1,113 +1,95 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAuthenticatedUser } from "@/lib/supabase/auth";
 
 export const dynamic = "force-dynamic";
 
 type RouteParams = { params: Promise<{ threadId: string }> };
 
-// Explicit environment variables for Vercel Edge Runtime compatibility
-const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-function getSupabaseAdmin() {
-  return createClient(
-    NEXT_PUBLIC_SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY
-  );
-}
-
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  try {
-    const { threadId } = await params;
-    const userId = req.headers.get("x-user-id");
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const supabase = getSupabaseAdmin();
-
-    // Get thread
-    const { data: thread, error: threadError } = await supabase
-      .from("threads")
-      .select("*")
-      .eq("id", threadId)
-      .eq("user_id", userId)
-      .single();
-
-    if (threadError || !thread) {
-      return NextResponse.json({ error: "Thread not found" }, { status: 404 });
-    }
-
-    // Get messages
-    const { data: messages, error: messagesError } = await supabase
-      .from("messages")
-      .select("*")
-      .eq("thread_id", threadId)
-      .order("created_at", { ascending: true });
-
-    if (messagesError) {
-      return NextResponse.json({ error: messagesError.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ thread, messages });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ error: message }, { status: 500 });
+  const authResult = await requireAuthenticatedUser();
+  if (authResult.error) {
+    return authResult.response!;
   }
+
+  const { user } = authResult;
+  const { threadId } = await params;
+
+  const supabase = createAdminClient();
+
+  // Get thread
+  const { data: thread, error: threadError } = await supabase
+    .from("threads")
+    .select("*")
+    .eq("id", threadId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (threadError || !thread) {
+    return NextResponse.json({ error: "Thread not found" }, { status: 404 });
+  }
+
+  // Get messages
+  const { data: messages, error: messagesError } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("thread_id", threadId)
+    .order("created_at", { ascending: true });
+
+  if (messagesError) {
+    return NextResponse.json({ error: messagesError.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ thread, messages });
 }
 
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  try {
-    const { threadId } = await params;
-    const userId = req.headers.get("x-user-id");
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const supabase = getSupabaseAdmin();
-    const { error } = await supabase
-      .from("threads")
-      .delete()
-      .eq("id", threadId)
-      .eq("user_id", userId);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ error: message }, { status: 500 });
+  const authResult = await requireAuthenticatedUser();
+  if (authResult.error) {
+    return authResult.response!;
   }
+
+  const { user } = authResult;
+  const { threadId } = await params;
+
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("threads")
+    .delete()
+    .eq("id", threadId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
 }
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
-  try {
-    const { threadId } = await params;
-    const userId = req.headers.get("x-user-id");
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const body = await req.json();
-    const supabase = getSupabaseAdmin();
-
-    const { data, error } = await supabase
-      .from("threads")
-      .update({ title: body.title })
-      .eq("id", threadId)
-      .eq("user_id", userId)
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ thread: data });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ error: message }, { status: 500 });
+  const authResult = await requireAuthenticatedUser();
+  if (authResult.error) {
+    return authResult.response!;
   }
+
+  const { user } = authResult;
+  const { threadId } = await params;
+  const body = await req.json();
+
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("threads")
+    .update({ title: body.title })
+    .eq("id", threadId)
+    .eq("user_id", user.id)
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ thread: data });
 }
