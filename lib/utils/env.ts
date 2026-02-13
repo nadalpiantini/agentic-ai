@@ -23,8 +23,12 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+// Explicit environment variables for Vercel Edge Runtime compatibility
+const NODE_ENV = process.env.NODE_ENV || "";
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+
 const isBuildTime =
-  process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_SUPABASE_URL;
+  NODE_ENV === "production" && !NEXT_PUBLIC_SUPABASE_URL;
 
 let _env: Env | null = null;
 

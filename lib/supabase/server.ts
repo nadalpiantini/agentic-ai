@@ -1,12 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+// Explicit environment variables for Vercel Edge Runtime compatibility
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+
 export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -18,7 +22,7 @@ export async function createClient() {
               cookieStore.set(name, value, options);
             } catch {
               // setAll is called from a Server Component where cookies
-              // cannot be modified. This can safely be ignored when the
+              // cannot be modified. This can safely be ignored when
               // middleware is refreshing auth tokens.
             }
           }

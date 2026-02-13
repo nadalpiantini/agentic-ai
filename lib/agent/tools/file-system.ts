@@ -10,6 +10,7 @@ import { join, resolve, relative } from "path";
 import { existsSync } from "fs";
 
 // Workspace directory for file operations (sandbox)
+// Explicit environment variable for Vercel Edge Runtime compatibility
 const WORKSPACE_DIR = process.env.WORKSPACE_DIR || "/tmp/agentic-workspace";
 
 /**

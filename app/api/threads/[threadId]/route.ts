@@ -3,14 +3,18 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
+type RouteParams = { params: Promise<{ threadId: string }> };
+
+// Explicit environment variables for Vercel Edge Runtime compatibility
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+
 function getSupabaseAdmin() {
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    NEXT_PUBLIC_SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY
   );
 }
-
-type RouteParams = { params: Promise<{ threadId: string }> };
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
   try {

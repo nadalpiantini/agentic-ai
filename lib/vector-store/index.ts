@@ -4,19 +4,20 @@ import { createClient } from "@supabase/supabase-js";
 
 let vectorStore: SupabaseVectorStore | null = null;
 
+// Explicit environment variables for Vercel Edge Runtime compatibility
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+
 export function getVectorStore(): SupabaseVectorStore | null {
   if (vectorStore) return vectorStore;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const openaiKey = process.env.OPENAI_API_KEY;
-
-  if (!supabaseUrl || !supabaseKey || !openaiKey) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !OPENAI_API_KEY) {
     return null;
   }
 
-  const client = createClient(supabaseUrl, supabaseKey);
-  const embeddings = new OpenAIEmbeddings({ apiKey: openaiKey });
+  const client = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const embeddings = new OpenAIEmbeddings({ apiKey: OPENAI_API_KEY });
 
   vectorStore = new SupabaseVectorStore(embeddings, {
     client,

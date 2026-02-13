@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+// Explicit environment variables for Vercel Edge Runtime compatibility
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
@@ -9,8 +13,8 @@ export async function GET(request: NextRequest) {
   if (code) {
     const cookieStore = await cookies();
     const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY,
       {
         cookies: {
           getAll() {
@@ -18,7 +22,13 @@ export async function GET(request: NextRequest) {
           },
           setAll(cookiesToSet) {
             for (const { name, value, options } of cookiesToSet) {
-              cookieStore.set(name, value, options);
+              try {
+                cookieStore.set(name, value, options);
+              } catch {
+                // setAll is called from a Server Component where cookies
+                // cannot be modified. This can safely be ignored when
+                // middleware is refreshing auth tokens.
+              }
             }
           },
         },
@@ -26,6 +36,7 @@ export async function GET(request: NextRequest) {
     );
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
     if (!error) {
       return NextResponse.redirect(`${origin}/chat`);
     }
