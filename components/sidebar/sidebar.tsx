@@ -25,12 +25,13 @@ export function Sidebar({
   };
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-zinc-800 bg-zinc-950">
+    <aside className="flex h-full w-full flex-col border-r border-zinc-800 bg-zinc-950">
       <div className="flex items-center justify-between border-b border-zinc-800 p-4">
         <h2 className="text-sm font-semibold text-zinc-200">Chats</h2>
         <button
           onClick={handleNewThread}
           className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs text-white hover:bg-blue-700 transition-colors"
+          aria-label="New chat"
         >
           <Plus className="h-3 w-3" />
           New

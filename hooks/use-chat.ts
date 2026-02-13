@@ -84,5 +84,6 @@ export function useChat(threadId: string | undefined) {
     isStreaming: stream.isStreaming,
     abort: stream.abort,
     streamedContent: stream.streamedContent,
+    feedEvents: stream.feedEvents,
   };
 }

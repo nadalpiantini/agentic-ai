@@ -16,4 +16,9 @@ export const MODEL_CONFIGS: Record<ModelProvider, ModelConfig> = {
     temperature: 0.7,
     maxTokens: 4096,
   },
+  zai: {
+    model: "glm-5",
+    temperature: 0.7,
+    maxTokens: 4096,
+  },
 } as const;

@@ -1,4 +1,4 @@
-export type ModelProvider = "claude" | "deepseek" | "ollama";
+export type ModelProvider = "claude" | "deepseek" | "ollama" | "zai";
 
 export interface ModelConfig {
   model?: string;

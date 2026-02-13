@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import type { FeedEvent } from "@/types/feed";
 
 interface StreamMessage {
   role: "user" | "assistant" | "system" | "tool";
@@ -11,19 +12,60 @@ interface UseAgentStreamOptions {
   onMessage?: (message: StreamMessage) => void;
   onError?: (error: string) => void;
   onComplete?: () => void;
+  onFeedEvent?: (event: FeedEvent) => void;
+}
+
+function extractContent(msg: Record<string, unknown>): string {
+  // Handle LangChain serialized format (lc/kwargs) and plain format
+  const kwargs = msg.kwargs as Record<string, unknown> | undefined;
+  return (
+    (kwargs?.content as string) ??
+    (typeof msg.content === "string" ? msg.content : "") ??
+    ""
+  );
+}
+
+function extractToolCalls(
+  msg: Record<string, unknown>
+): { id: string; name: string; args: Record<string, unknown> }[] {
+  const kwargs = msg.kwargs as Record<string, unknown> | undefined;
+  const calls =
+    (kwargs?.tool_calls as unknown[]) ??
+    (msg.tool_calls as unknown[]) ??
+    [];
+  return calls.map((tc) => {
+    const call = tc as Record<string, unknown>;
+    return {
+      id: (call.id as string) ?? "",
+      name: (call.name as string) ?? "unknown",
+      args: (call.args as Record<string, unknown>) ?? {},
+    };
+  });
 }
 
 export function useAgentStream(options?: UseAgentStreamOptions) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedContent, setStreamedContent] = useState("");
+  const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const emitFeed = useCallback(
+    (event: FeedEvent) => {
+      setFeedEvents((prev) => [...prev, event]);
+      options?.onFeedEvent?.(event);
+    },
+    [options]
+  );
 
   const sendMessage = useCallback(
     async (message: string, threadId: string, model?: string) => {
       setIsStreaming(true);
       setStreamedContent("");
+      setFeedEvents([]);
 
       abortControllerRef.current = new AbortController();
+
+      let stepCount = 0;
 
       try {
         const response = await fetch("/api/agent/stream", {
@@ -56,6 +98,12 @@ export function useAgentStream(options?: UseAgentStreamOptions) {
             const data = line.slice(6).trim();
 
             if (data === "[DONE]") {
+              emitFeed({
+                id: crypto.randomUUID(),
+                type: "complete",
+                timestamp: new Date(),
+                data: { step: stepCount },
+              });
               options?.onComplete?.();
               continue;
             }
@@ -68,15 +116,89 @@ export function useAgentStream(options?: UseAgentStreamOptions) {
                 continue;
               }
 
-              // Extract assistant message from planner node updates
+              // ── Router: model selection ──
+              if (event.router) {
+                const selectedModel =
+                  event.router.currentModel ?? model ?? "unknown";
+                emitFeed({
+                  id: crypto.randomUUID(),
+                  type: "model_selected",
+                  timestamp: new Date(),
+                  data: { model: selectedModel },
+                });
+              }
+
+              // ── Planner: reasoning + tool calls ──
               if (event.planner?.messages) {
-                for (const msg of event.planner.messages) {
-                  const content = typeof msg.content === "string"
-                    ? msg.content
-                    : JSON.stringify(msg.content);
-                  accumulated += content;
-                  setStreamedContent(accumulated);
-                  options?.onMessage?.({ role: "assistant", content });
+                stepCount++;
+                emitFeed({
+                  id: crypto.randomUUID(),
+                  type: "step",
+                  timestamp: new Date(),
+                  data: { step: stepCount },
+                });
+
+                for (const msg of event.planner.messages as Record<
+                  string,
+                  unknown
+                >[]) {
+                  // Extract text content
+                  const content = extractContent(msg);
+                  if (content) {
+                    accumulated += content;
+                    setStreamedContent(accumulated);
+                    options?.onMessage?.({ role: "assistant", content });
+                  }
+
+                  // Extract tool calls
+                  const toolCalls = extractToolCalls(msg);
+                  for (const tc of toolCalls) {
+                    emitFeed({
+                      id: crypto.randomUUID(),
+                      type: "tool_call",
+                      timestamp: new Date(),
+                      data: {
+                        toolName: tc.name,
+                        toolArgs: tc.args,
+                        step: stepCount,
+                      },
+                    });
+                  }
+                }
+              }
+
+              // ── Executor: tool results ──
+              if (event.executor?.messages) {
+                for (const msg of event.executor.messages as Record<
+                  string,
+                  unknown
+                >[]) {
+                  const kwargs = msg.kwargs as
+                    | Record<string, unknown>
+                    | undefined;
+                  const toolName =
+                    (kwargs?.name as string) ?? (msg.name as string) ?? "";
+                  const toolResult =
+                    (kwargs?.content as string) ??
+                    (typeof msg.content === "string" ? msg.content : "");
+                  const isError =
+                    toolResult.startsWith("Error") ||
+                    toolResult.startsWith("Error executing tool");
+
+                  emitFeed({
+                    id: crypto.randomUUID(),
+                    type: "tool_result",
+                    timestamp: new Date(),
+                    data: {
+                      toolName,
+                      toolResult:
+                        toolResult.length > 200
+                          ? toolResult.slice(0, 200) + "..."
+                          : toolResult,
+                      toolError: isError,
+                      step: stepCount,
+                    },
+                  });
                 }
               }
             } catch {
@@ -93,7 +215,7 @@ export function useAgentStream(options?: UseAgentStreamOptions) {
         abortControllerRef.current = null;
       }
     },
-    [options]
+    [options, emitFeed]
   );
 
   const abort = useCallback(() => {
@@ -106,5 +228,6 @@ export function useAgentStream(options?: UseAgentStreamOptions) {
     abort,
     isStreaming,
     streamedContent,
+    feedEvents,
   };
 }

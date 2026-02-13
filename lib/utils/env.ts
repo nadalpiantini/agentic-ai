@@ -8,14 +8,15 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
 
   // LLM Providers
-  ANTHROPIC_API_KEY: z.string().min(1),
-  DEEPSEEK_API_KEY: z.string().min(1),
+  ANTHROPIC_API_KEY: z.string().default(""),
+  DEEPSEEK_API_KEY: z.string().default(""),
+  ZAI_API_KEY: z.string().default(""),
   OLLAMA_BASE_URL: z.string().default("http://localhost:11434"),
 
   // Agent Config
   DEFAULT_MODEL: z
-    .enum(["claude", "deepseek", "ollama"])
-    .default("claude"),
+    .enum(["claude", "deepseek", "ollama", "zai"])
+    .default("zai"),
   MAX_LLM_CALLS: z.coerce.number().int().positive().default(25),
   MAX_RECURSION_DEPTH: z.coerce.number().int().positive().default(10),
 });
@@ -32,10 +33,11 @@ const buildDefaults: Env = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder",
   SUPABASE_SERVICE_ROLE_KEY: "placeholder",
   DATABASE_URL: "postgres://placeholder",
-  ANTHROPIC_API_KEY: "placeholder",
-  DEEPSEEK_API_KEY: "placeholder",
+  ANTHROPIC_API_KEY: "",
+  DEEPSEEK_API_KEY: "",
+  ZAI_API_KEY: "",
   OLLAMA_BASE_URL: "http://localhost:11434",
-  DEFAULT_MODEL: "claude",
+  DEFAULT_MODEL: "zai",
   MAX_LLM_CALLS: 25,
   MAX_RECURSION_DEPTH: 10,
 };

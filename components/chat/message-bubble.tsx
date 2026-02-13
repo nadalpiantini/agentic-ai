@@ -2,6 +2,8 @@
 
 import { cn } from "@/lib/utils/cn";
 import { Bot, User } from "lucide-react";
+import { MarkdownRenderer } from "./markdown-renderer";
+import { CopyButton } from "@/components/ui/copy-button";
 
 interface MessageBubbleProps {
   role: "user" | "assistant" | "system" | "tool";
@@ -16,7 +18,7 @@ export function MessageBubble({ role, content, isStreaming }: MessageBubbleProps
   return (
     <div
       className={cn(
-        "flex gap-3 px-4 py-3",
+        "group flex gap-3 px-4 py-3 animate-message-in",
         isUser ? "flex-row-reverse" : "flex-row"
       )}
     >
@@ -35,7 +37,7 @@ export function MessageBubble({ role, content, isStreaming }: MessageBubbleProps
 
       <div
         className={cn(
-          "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+          "relative max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
           isUser
             ? "bg-blue-600 text-white"
             : isSystem
@@ -43,9 +45,24 @@ export function MessageBubble({ role, content, isStreaming }: MessageBubbleProps
               : "bg-zinc-800 text-zinc-100"
         )}
       >
-        <div className="whitespace-pre-wrap break-words">{content}</div>
+        {isUser ? (
+          <div className="whitespace-pre-wrap break-words">{content}</div>
+        ) : isSystem ? (
+          <div className="whitespace-pre-wrap break-words">{content}</div>
+        ) : (
+          <MarkdownRenderer content={content} />
+        )}
         {isStreaming && (
-          <span className="inline-block ml-1 animate-pulse">|</span>
+          <span className="inline-block ml-1 animate-pulse text-blue-400">
+            |
+          </span>
+        )}
+
+        {/* Copy button on hover for assistant messages */}
+        {!isUser && !isSystem && !isStreaming && content && (
+          <div className="absolute -bottom-7 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <CopyButton text={content} />
+          </div>
         )}
       </div>
     </div>

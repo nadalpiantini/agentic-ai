@@ -1,6 +1,7 @@
 "use client";
 
 import { MessageSquare, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils/cn";
 
 interface ThreadItemProps {
@@ -17,6 +18,20 @@ export function ThreadItem({
   onClick,
   onDelete,
 }: ThreadItemProps) {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast("Delete this conversation?", {
+      action: {
+        label: "Delete",
+        onClick: () => onDelete(),
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  };
+
   return (
     <button
       onClick={onClick}
@@ -30,12 +45,10 @@ export function ThreadItem({
       <MessageSquare className="h-4 w-4 shrink-0" />
       <span className="flex-1 truncate">{title}</span>
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        className="hidden shrink-0 rounded p-1 text-zinc-500 hover:bg-zinc-700 hover:text-red-400 group-hover:block"
+        onClick={handleDelete}
+        className="shrink-0 rounded p-1 text-zinc-500 hover:bg-zinc-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
         title="Delete thread"
+        aria-label="Delete thread"
       >
         <Trash2 className="h-3 w-3" />
       </button>
