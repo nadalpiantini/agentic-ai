@@ -1,0 +1,6 @@
+[    3436ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/threads:0
+[    4491ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/threads:0
+[  145068ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=XPbPccx9JUNk5T-tyuf6p' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_client_664239a6._.js:10878
+[  146072ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=XPbPccx9JUNk5T-tyuf6p' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_client_664239a6._.js:10878
+[  147074ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=XPbPccx9JUNk5T-tyuf6p' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_client_664239a6._.js:10878
+[  148076ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=XPbPccx9JUNk5T-tyuf6p' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_client_664239a6._.js:10878
