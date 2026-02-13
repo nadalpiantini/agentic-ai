@@ -52,7 +52,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   const sidebarProps = {
-    userId: user.id,
     activeThreadId,
     onThreadSelect: handleThreadSelect,
     onNewThread: handleNewThread,
