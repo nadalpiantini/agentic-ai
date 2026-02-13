@@ -1,0 +1,79 @@
+[     573ms] [ERROR] In HTML, %s cannot be a descendant of <%s>.
+This will cause a hydration error.%s <button> button 
+
+  ...
+    <RedirectBoundary>
+      <RedirectErrorBoundary router={{...}}>
+        <InnerLayoutRouter url="/chat" tree={[...]} params={{}} cacheNode={{...}} segmentPath={[...]} ...>
+          <SegmentViewNode type="layout" pagePath="/dev/agent...">
+            <SegmentTrieNode>
+            <script>
+            <script>
+            <script>
+            <ClientSegmentRoot Component={function DashboardLayout} slots={{...}} serverProvidedParams={{params:{}, ...}}>
+              <DashboardLayout params={Promise}>
+                <div className="flex h-scr...">
+                  <Sidebar userId="6463954c-e..." activeThreadId={undefined} onThreadSelect={function handleThreadSelect} ...>
+                    <aside className="flex h-ful...">
+                      <div>
+                      <div className="flex-1 ove...">
+                        <div className="space-y-1">
+                          <ThreadItem id="7ec0c957-7..." title="New Chat" isActive={false} onClick={function onClick} ...>
+>                           <button
+>                             onClick={function onClick}
+>                             className="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm t..."
+>                           >
+                              <MessageSquare>
+                              <span>
+>                             <button
+>                               onClick={function onClick}
+>                               className="hidden shrink-0 rounded p-1 text-zinc-500 hover:bg-zinc-700 hover:text-red-..."
+>                               title="Delete thread"
+>                             >
+                          ...
+                      ...
+                  ...
+        ...
+ @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_a58b1fd5._.js:3127
+[  455969ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=W0RyYH8AjBK_4khI6D_Mq' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_client_664239a6._.js:10878
+[  456971ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=W0RyYH8AjBK_4khI6D_Mq' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_client_664239a6._.js:10878
+[  457974ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=W0RyYH8AjBK_4khI6D_Mq' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_client_664239a6._.js:10878
+[  458976ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=W0RyYH8AjBK_4khI6D_Mq' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_client_664239a6._.js:10878
+[  459981ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=W0RyYH8AjBK_4khI6D_Mq' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_client_664239a6._.js:10878
+[  467216ms] [ERROR] In HTML, %s cannot be a descendant of <%s>.
+This will cause a hydration error.%s <button> button 
+
+  ...
+    <RedirectBoundary>
+      <RedirectErrorBoundary router={{...}}>
+        <InnerLayoutRouter url="/chat/5180..." tree={[...]} params={{}} cacheNode={{...}} segmentPath={[...]} ...>
+          <SegmentViewNode type="layout" pagePath="/dev/agent...">
+            <SegmentTrieNode>
+            <script>
+            <script>
+            <script>
+            <ClientSegmentRoot Component={function DashboardLayout} slots={{...}} serverProvidedParams={{params:{}, ...}}>
+              <DashboardLayout params={Promise}>
+                <div className="flex h-scr...">
+                  <Sidebar userId="6463954c-e..." activeThreadId={undefined} onThreadSelect={function handleThreadSelect} ...>
+                    <aside className="flex h-ful...">
+                      <div>
+                      <div className="flex-1 ove...">
+                        <div className="space-y-1">
+                          <ThreadItem id="518027e4-c..." title="New Chat" isActive={false} onClick={function onClick} ...>
+>                           <button
+>                             onClick={function onClick}
+>                             className="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm t..."
+>                           >
+                              <MessageSquare>
+                              <span>
+>                             <button
+>                               onClick={function onClick}
+>                               className="hidden shrink-0 rounded p-1 text-zinc-500 hover:bg-zinc-700 hover:text-red-..."
+>                               title="Delete thread"
+>                             >
+                          ...
+                      ...
+                  ...
+        ...
+ @ http://localhost:3000/_next/static/chunks/d5be2_next_dist_a58b1fd5._.js:3127
