@@ -1,36 +1,41 @@
 import type { AgentStateType } from "../state";
-import { AGENT_CONFIG } from "@/config/agent";
+import { detectAgentType, getModelForAgent, getAgentConfig } from "../agents";
 
+/**
+ * Smart Router Node
+ * Selects both agent type and model based on message content
+ */
 export async function routerNode(
   state: AgentStateType
 ): Promise<Partial<AgentStateType>> {
   const lastMessage = state.messages[state.messages.length - 1];
   const content =
     typeof lastMessage?.content === "string"
-      ? lastMessage.content.toLowerCase()
-      : "";
+      ? lastMessage.content
+      : JSON.stringify(lastMessage?.content) || "";
 
-  let selectedModel = AGENT_CONFIG.defaultModel;
+  // Detect agent type from content
+  const agentType = detectAgentType(content);
 
-  if (
-    content.includes("private") ||
-    content.includes("local") ||
-    content.includes("offline")
-  ) {
-    selectedModel = "ollama";
-  } else if (
-    content.includes("translate") ||
-    content.includes("summarize") ||
-    content.includes("bulk")
-  ) {
-    selectedModel = "deepseek";
-  } else if (
-    content.includes("code") ||
-    content.includes("analyze") ||
-    content.includes("reason")
-  ) {
-    selectedModel = "claude";
-  }
+  // Check for constraints in the message
+  const constraints = {
+    privacy:
+      content.toLowerCase().includes("private") ||
+      content.toLowerCase().includes("local") ||
+      content.toLowerCase().includes("offline"),
+    cost: content.toLowerCase().includes("cheap") ||
+      content.toLowerCase().includes("fast"),
+    quality: content.toLowerCase().includes("best") ||
+      content.toLowerCase().includes("quality"),
+  };
 
-  return { currentModel: selectedModel };
+  // Get optimal model for this agent type with constraints
+  const selectedModel = getModelForAgent(agentType, constraints);
+
+  const agentConfig = getAgentConfig(agentType);
+
+  return {
+    currentModel: selectedModel,
+    currentAgent: agentType,
+  };
 }

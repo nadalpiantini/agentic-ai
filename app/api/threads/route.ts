@@ -1,35 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { Pool } from "pg";
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
 export const dynamic = "force-dynamic";
 
-function getSupabaseAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
-
 export async function GET(req: NextRequest) {
   try {
-    const userId = req.headers.get("x-user-id");
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const userId = req.headers.get("x-user-id") || "default-user";
 
-    const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase
-      .from("threads")
-      .select("*")
-      .eq("user_id", userId)
-      .order("updated_at", { ascending: false })
-      .limit(50);
+    const result = await pool.query(
+      "SELECT * FROM threads WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 50",
+      [userId]
+    );
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ threads: data });
+    return NextResponse.json({ threads: result.rows });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });
@@ -38,26 +25,16 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const userId = req.headers.get("x-user-id");
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    const userId = req.headers.get("x-user-id") || "default-user";
     const body = await req.json();
     const title = body.title || "New Chat";
 
-    const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase
-      .from("threads")
-      .insert({ user_id: userId, title })
-      .select()
-      .single();
+    const result = await pool.query(
+      "INSERT INTO threads (user_id, title) VALUES ($1, $2) RETURNING *",
+      [userId, title]
+    );
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ thread: data }, { status: 201 });
+    return NextResponse.json({ thread: result.rows[0] }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });
