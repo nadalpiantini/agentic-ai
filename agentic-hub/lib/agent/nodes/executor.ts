@@ -1,4 +1,6 @@
 import { AgentState } from "../state";
+import { ToolMessage, AIMessage } from "@langchain/core/messages";
+import { getToolByName } from "../tools";
 
 /**
  * Executor Node - Tool execution and result collection
@@ -8,12 +10,6 @@ import { AgentState } from "../state";
  * - HTTP requests (external API calls)
  * - RAG search (vector similarity queries)
  * - File operations, data processing, etc.
- *
- * Currently a placeholder - future implementation will include:
- * - Tool registry and dispatcher
- * - Tool execution with error handling
- * - Result validation and formatting
- * - Context stack management for nested tool calls
  *
  * @param state - Current agent state
  * @returns Next node name ("planner" for loop, "__end__" if complete)
@@ -25,42 +21,87 @@ export async function executorNode(
 
   console.log("[Executor] Context stack depth:", contextStack.length);
 
-  // Placeholder: Extract tool calls from latest AI message
+  // Extract tool calls from latest AI message
   const latestMessage = messages[messages.length - 1];
-  console.log("[Executor] Processing tool calls from:", latestMessage?.content);
 
-  // TODO: Parse tool calls from AI message
-  // const toolCalls = latestMessage.tool_calls;
-
-  // TODO: Execute each tool call
-  // const results = await Promise.all(
-  //   toolCalls.map(async (toolCall) => {
-  //     const tool = getTool(toolCall.name);
-  //     const result = await tool.invoke(toolCall.args);
-  //     return new ToolMessage(result, toolCall.id);
-  //   })
-  // );
-
-  // TODO: Handle errors gracefully
-  // - Retry on transient failures
-  // - Return error messages to LLM
-  // - Log for monitoring
-
-  // TODO: Update context stack for nested calls
-  // - Push context before tool execution
-  // - Pop after tool returns
-
-  // Placeholder: Simulate tool execution
-  const toolResults = []; // Placeholder
-
-  if (toolResults.length > 0) {
-    console.log("[Executor] Tool executed, routing back to planner");
+  if (!latestMessage || !("tool_calls" in latestMessage)) {
+    console.log("[Executor] No tool calls found, ending workflow");
     return {
+      next: "__end__",
+    };
+  }
+
+  const toolCalls = (latestMessage as AIMessage).tool_calls;
+
+  if (!toolCalls || toolCalls.length === 0) {
+    console.log("[Executor] No tool calls to execute, ending workflow");
+    return {
+      next: "__end__",
+    };
+  }
+
+  console.log(
+    "[Executor] Executing",
+    toolCalls.length,
+    "tool(s):",
+    toolCalls.map((tc) => tc.name).join(", ")
+  );
+
+  // Execute each tool call
+  const toolMessages: ToolMessage[] = [];
+
+  for (const toolCall of toolCalls) {
+    const { name, args, id } = toolCall;
+
+    try {
+      console.log(`[Executor] Executing tool: ${name}`, args);
+
+      // Get tool from registry
+      const tool = getToolByName(name);
+
+      if (!tool) {
+        throw new Error(`Tool not found: ${name}`);
+      }
+
+      // Execute tool
+      const result = await tool.invoke(args);
+
+      console.log(`[Executor] Tool ${name} succeeded`);
+
+      // Create tool message with result
+      toolMessages.push(
+        new ToolMessage({
+          content: JSON.stringify(result),
+          name: name || "unknown",
+          tool_call_id: id || "",
+        })
+      );
+    } catch (error) {
+      console.error(`[Executor] Tool ${name} failed:`, error);
+
+      // Return error as tool message so LLM can handle it
+      toolMessages.push(
+        new ToolMessage({
+          content: JSON.stringify({
+            error: (error as Error).message,
+            tool: name,
+          }),
+          name: name || "unknown",
+          tool_call_id: id || "",
+        })
+      );
+    }
+  }
+
+  if (toolMessages.length > 0) {
+    console.log("[Executor] All tools executed, routing back to planner");
+    return {
+      messages: toolMessages,
       next: "planner",
     };
   }
 
-  console.log("[Executor] No tools to execute, ending workflow");
+  console.log("[Executor] No tool results, ending workflow");
   return {
     next: "__end__",
   };

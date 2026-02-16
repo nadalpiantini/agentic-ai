@@ -1,4 +1,6 @@
 import { AgentState } from "../state";
+import { getModelAdapter } from "../../models";
+import { allTools } from "../tools";
 
 /**
  * Planner Node - LLM invocation and response generation
@@ -8,12 +10,6 @@ import { AgentState } from "../state";
  * - Passes conversation history and context
  * - Receives response with potential tool calls
  * - Tracks LLM call count for loop guard
- *
- * Currently a placeholder - future implementation will include:
- * - Model adapter integration (Claude/DeepSeek/Ollama)
- * - Tool binding for available functions
- * - Prompt construction with context stack
- * - Response parsing and validation
  *
  * @param state - Current agent state
  * @returns Next node name ("executor" if tools called, "__end__" if done)
@@ -26,46 +22,63 @@ export async function plannerNode(
   console.log("[Planner] Using model:", selectedModel);
   console.log("[Planner] LLM calls so far:", llmCalls);
 
-  // Placeholder: Check loop guard
+  // Check loop guard
   const MAX_LLM_CALLS = Number(process.env.MAX_LLM_CALLS) || 25;
   if (llmCalls >= MAX_LLM_CALLS) {
     console.error("[Planner] Max LLM calls reached, terminating");
     return {
-      llmCalls: 1, // Increment counter
+      llmCalls: llmCalls + 1,
       next: "__end__",
     };
   }
 
-  // Placeholder: Extract latest user message
+  // Extract latest user message
   const latestMessage = messages[messages.length - 1];
   console.log("[Planner] Processing:", latestMessage?.content);
 
-  // TODO: Initialize model adapter
-  // const model = getModelAdapter(selectedModel);
-  // const response = await model.invoke(messages);
+  try {
+    // Initialize model adapter
+    const model = getModelAdapter(selectedModel);
 
-  // TODO: Bind tools to model
-  // const tools = getAvailableTools();
-  // const modelWithTools = model.bindTools(tools);
+    // Bind tools to model (check if bindTools exists)
+    const modelWithTools = (model as any).bindTools
+      ? (model as any).bindTools(allTools)
+      : model;
 
-  // TODO: Invoke model with current state
-  // const result = await modelWithTools.invoke(messages);
+    // Invoke model with current state
+    const result = await modelWithTools.invoke(messages);
 
-  // Placeholder: Simulate LLM response
-  // In real implementation, check for tool_calls in response
-  const hasToolCalls = false; // Placeholder
+    console.log("[Planner] Model response received");
 
-  if (hasToolCalls) {
-    console.log("[Planner] Tool calls detected, routing to executor");
+    // Check for tool calls in response
+    const hasToolCalls =
+      result.tool_calls &&
+      Array.isArray(result.tool_calls) &&
+      result.tool_calls.length > 0;
+
+    if (hasToolCalls) {
+      console.log(
+        "[Planner] Tool calls detected:",
+        result.tool_calls.map((tc: any) => tc.name).join(", ")
+      );
+      return {
+        messages: [result],
+        llmCalls: llmCalls + 1,
+        next: "executor",
+      };
+    }
+
+    console.log("[Planner] No tool calls, ending workflow");
     return {
-      llmCalls: 1, // Increment counter
-      next: "executor",
+      messages: [result],
+      llmCalls: llmCalls + 1,
+      next: "__end__",
+    };
+  } catch (error) {
+    console.error("[Planner] Error invoking model:", error);
+    return {
+      llmCalls: llmCalls + 1,
+      next: "__end__",
     };
   }
-
-  console.log("[Planner] No tool calls, ending workflow");
-  return {
-    llmCalls: 1, // Increment counter
-    next: "__end__",
-  };
 }

@@ -1,12 +1,13 @@
 export interface Message {
   id: string;
-  thread_id: string;
+  thread_id?: string;
   role: "user" | "assistant" | "system";
   content: string;
   tool_calls?: any[];
   model_used?: string;
   tokens_used?: number;
-  created_at: string;
+  created_at?: string;
+  timestamp?: string; // For frontend compatibility
 }
 
 export interface Thread {
