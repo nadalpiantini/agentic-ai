@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 /**
@@ -11,10 +10,23 @@ import { z } from "zod";
  * - Deleting records with RLS enforcement
  */
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+let supabaseClient: any = null;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+function getSupabaseClient() {
+  if (!supabaseClient) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase credentials not configured');
+    }
+
+    const { createClient } = require("@supabase/supabase-js");
+    supabaseClient = createClient(supabaseUrl, supabaseKey);
+  }
+
+  return supabaseClient;
+}
 
 /**
  * Query threads from database
@@ -22,7 +34,7 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 export async function queryThreads(args: { userId?: string; limit?: number }) {
   const { userId, limit = 10 } = args;
 
-  let query = supabase
+  let query = getSupabaseClient()
     .from("threads")
     .select("*")
     .order("updated_at", { ascending: false })
@@ -50,7 +62,7 @@ export async function queryThreads(args: { userId?: string; limit?: number }) {
 export async function createThread(args: { userId: string; title?: string }) {
   const { userId, title } = args;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("threads")
     .insert({
       user_id: userId,
@@ -75,7 +87,7 @@ export async function createThread(args: { userId: string; title?: string }) {
 export async function queryMessages(args: { threadId: string; limit?: number }) {
   const { threadId, limit = 50 } = args;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("messages")
     .select("*")
     .eq("thread_id", threadId)
@@ -103,7 +115,7 @@ export async function createMessage(args: {
 }) {
   const { threadId, role, content, userId } = args;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("messages")
     .insert({
       thread_id: threadId,
@@ -138,7 +150,7 @@ export async function updateThread(args: {
   if (title) updateData.title = title;
   if (metadata) updateData.metadata = metadata;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("threads")
     .update(updateData)
     .eq("id", threadId)

@@ -1,5 +1,16 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+
+interface HealthResponse {
+  status: string;
+  timestamp: string;
+  uptime: number;
+  checks: {
+    database: string;
+    env: string;
+    llm?: string;
+  };
+  missing?: string[];
+}
 
 /**
  * Health Check Endpoint
@@ -13,7 +24,7 @@ import { createClient } from "@supabase/supabase-js";
  * - Environment configuration
  */
 export async function GET() {
-  const health = {
+  const health: HealthResponse = {
     status: "ok",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
@@ -23,16 +34,30 @@ export async function GET() {
     },
   };
 
+  // Check environment variables first (before trying to import Supabase)
+  const requiredEnvs = [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "DATABASE_URL",
+  ];
+
+  const missingEnvs = requiredEnvs.filter((env) => !process.env[env]);
+
+  if (missingEnvs.length > 0) {
+    health.checks.env = "error";
+    health.status = "degraded";
+    health.missing = missingEnvs;
+    return NextResponse.json(health, { status: 503 });
+  }
+
+  // Import Supabase only if env vars are present
+  const { createClient } = await import("@supabase/supabase-js");
+
   // Check database connectivity
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      health.checks.database = "error";
-      health.checks.env = "error";
-      return NextResponse.json(health, { status: 503 });
-    }
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -49,23 +74,6 @@ export async function GET() {
   } catch (error) {
     health.checks.database = "error";
     health.status = "degraded";
-    return NextResponse.json(health, { status: 503 });
-  }
-
-  // Check environment variables
-  const requiredEnvs = [
-    "NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    "SUPABASE_SERVICE_ROLE_KEY",
-    "DATABASE_URL",
-  ];
-
-  const missingEnvs = requiredEnvs.filter((env) => !process.env[env]);
-
-  if (missingEnvs.length > 0) {
-    health.checks.env = "error";
-    health.status = "degraded";
-    health.missing = missingEnvs;
     return NextResponse.json(health, { status: 503 });
   }
 

@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 /**
@@ -10,9 +9,23 @@ import { z } from "zod";
  * - Context-aware knowledge base queries
  */
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+let supabaseClient: any = null;
+
+function getSupabaseClient() {
+  if (!supabaseClient) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase credentials not configured');
+    }
+
+    const { createClient } = require("@supabase/supabase-js");
+    supabaseClient = createClient(supabaseUrl, supabaseKey);
+  }
+
+  return supabaseClient;
+}
 
 /**
  * Perform semantic search over documents
@@ -30,7 +43,7 @@ export async function semanticSearch(args: {
     // For now, this is a placeholder - in production you'd call an embedding API
     const queryEmbedding = await generateEmbedding(query);
 
-    let queryBuilder = supabase.rpc("match_documents", {
+    let queryBuilder = getSupabaseClient().rpc("match_documents", {
       query_embedding: queryEmbedding,
       match_threshold: threshold,
       match_count: limit,
@@ -70,7 +83,7 @@ export async function addDocument(args: {
     // Generate embedding for document content
     const embedding = await generateEmbedding(content);
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from("documents")
       .insert({
         user_id: userId,

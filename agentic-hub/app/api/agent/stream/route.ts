@@ -14,6 +14,9 @@
  * Response: SSE stream with events:
  * - data: JSON-encoded chunks with message content
  */
+
+export const dynamic = 'force-dynamic';
+
 import { NextRequest } from "next/server";
 import { requireUserId } from "@/lib/supabase/server";
 import { agentGraph } from "@/lib/agent/graph";
