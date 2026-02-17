@@ -1,0 +1,26 @@
+# Ignore everything except the agentic-hub project
+.Trash
+.cache
+.npm
+.nvm
+.bun
+.claude
+.config
+.docker
+.ollama
+Desktop
+Documents
+Downloads
+Library
+Movies
+Music
+Pictures
+Projects
+Public
+Applications
+miniforge3
+dev
+ai
+go
+bin
+node_modules
