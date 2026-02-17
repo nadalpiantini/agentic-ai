@@ -97,7 +97,7 @@ export async function POST(
     }
 
     const body = await req.json()
-    const { role, content, tool_calls } = body
+    const { role, content } = body
 
     if (!role || !content) {
       return NextResponse.json(
@@ -112,7 +112,6 @@ export async function POST(
         thread_id: threadId,
         role,
         content,
-        tool_calls: tool_calls || null,
       })
       .select()
       .single()
@@ -120,7 +119,7 @@ export async function POST(
     if (error) {
       console.error('[Messages POST] Database error:', JSON.stringify(error))
       return NextResponse.json(
-        { error: 'Failed to create message', details: error.message || error.code || 'unknown' },
+        { error: 'Failed to create message' },
         { status: 500 }
       )
     }
