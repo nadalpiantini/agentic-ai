@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Message } from '@/types'
 import { MessageList } from './MessageList'
 import { MessageInput } from './MessageInput'
@@ -26,12 +26,16 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
   const [isLoading, setIsLoading] = useState(false)
   const [selectedModel, setSelectedModel] = useState<'claude' | 'deepseek' | 'ollama'>('claude')
   const [activeThreadId, setActiveThreadId] = useState<string | null>(threadId)
+  const isSendingRef = useRef(false)
 
   useEffect(() => {
     setActiveThreadId(threadId)
   }, [threadId])
 
   useEffect(() => {
+    // Skip loading from DB when we just created the thread during send —
+    // the in-memory messages (user + streaming assistant) are the source of truth
+    if (isSendingRef.current) return
     if (activeThreadId) {
       loadMessages(activeThreadId)
     } else {
@@ -91,12 +95,14 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
   const handleSendMessage = useCallback(async (content: string) => {
     if (isLoading) return
     setIsLoading(true)
+    isSendingRef.current = true
 
     let tid = activeThreadId
     if (!tid) {
       tid = await createThread(content)
       if (!tid) {
         setIsLoading(false)
+        isSendingRef.current = false
         return
       }
     }
@@ -238,6 +244,7 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
       )
     } finally {
       setIsLoading(false)
+      isSendingRef.current = false
     }
   }, [activeThreadId, messages, selectedModel, isLoading, createThread])
 
