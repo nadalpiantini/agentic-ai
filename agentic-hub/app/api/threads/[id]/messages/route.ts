@@ -110,6 +110,7 @@ export async function POST(
     const { data: message, error } = await (supabase.from('messages') as any)
       .insert({
         thread_id: threadId,
+        user_id: userId,
         role,
         content,
       })
