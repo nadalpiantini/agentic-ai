@@ -19,7 +19,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-3xl mx-auto px-8 py-8 space-y-8">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
             <div className="w-16 h-16 rounded-2xl bg-brand-600/10 flex items-center justify-center mb-6">
