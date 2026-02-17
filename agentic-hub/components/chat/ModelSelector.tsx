@@ -7,26 +7,26 @@ interface ModelSelectorProps {
   onChange: (model: ModelOption) => void
 }
 
-const models: { id: ModelOption; label: string; description: string }[] = [
-  { id: 'claude', label: 'Claude', description: 'Quality' },
-  { id: 'deepseek', label: 'DeepSeek', description: 'Cost' },
-  { id: 'ollama', label: 'Ollama', description: 'Local' },
+const models: { id: ModelOption; label: string; color: string }[] = [
+  { id: 'claude', label: 'Claude', color: 'bg-emerald-400' },
+  { id: 'deepseek', label: 'DeepSeek', color: 'bg-blue-400' },
+  { id: 'ollama', label: 'Ollama', color: 'bg-orange-400' },
 ]
 
 export function ModelSelector({ value, onChange }: ModelSelectorProps) {
   return (
-    <div className="flex gap-1">
+    <div className="flex items-center gap-1 p-1 rounded-xl bg-surface-2 border border-white/5">
       {models.map(model => (
         <button
           key={model.id}
           onClick={() => onChange(model.id)}
-          className={`px-3 py-1 text-xs rounded-full transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition-all duration-200 ${
             value === model.id
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+              ? 'bg-brand-600/20 text-brand-300 shadow-sm'
+              : 'text-text-muted hover:text-text-secondary hover:bg-white/5'
           }`}
-          title={model.description}
         >
+          <div className={`w-1.5 h-1.5 rounded-full ${model.color} ${value === model.id ? 'opacity-100' : 'opacity-40'}`} />
           {model.label}
         </button>
       ))}

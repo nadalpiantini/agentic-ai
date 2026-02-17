@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent, KeyboardEvent } from 'react'
+import { useState, FormEvent, KeyboardEvent, useRef, useEffect } from 'react'
 
 interface MessageInputProps {
   onSend: (content: string) => void
@@ -10,10 +10,20 @@ interface MessageInputProps {
 
 export function MessageInput({ onSend, onClear, disabled }: MessageInputProps) {
   const [input, setInput] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = textareaRef.current
+    if (el) {
+      el.style.height = 'auto'
+      el.style.height = Math.min(el.scrollHeight, 160) + 'px'
+    }
+  }, [input])
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    if (input.trim()) {
+    if (input.trim() && !disabled) {
       onSend(input)
       setInput('')
     }
@@ -28,30 +38,46 @@ export function MessageInput({ onSend, onClear, disabled }: MessageInputProps) {
 
   return (
     <div className="p-4">
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <textarea
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
-          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          rows={1}
-        />
-        <button
-          type="submit"
-          disabled={!input.trim()}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          Send
-        </button>
-        <button
-          type="button"
-          onClick={onClear}
-          disabled={disabled}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          Clear
-        </button>
+      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
+        <div className="relative flex items-end gap-2 bg-surface-2 rounded-2xl border border-white/5 focus-within:border-brand-500/30 transition-colors p-2">
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Message Sephirot..."
+            disabled={disabled}
+            className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted px-3 py-2 resize-none focus:outline-none min-h-[40px] max-h-[160px] disabled:opacity-50"
+            rows={1}
+          />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={onClear}
+              disabled={disabled}
+              className="p-2 rounded-lg text-text-muted hover:text-text-secondary hover:bg-white/5 disabled:opacity-30 transition-colors"
+              title="Clear chat"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            </button>
+            <button
+              type="submit"
+              disabled={!input.trim() || disabled}
+              className="p-2.5 rounded-xl bg-brand-600 text-white hover:bg-brand-500 disabled:bg-surface-4 disabled:text-text-muted transition-all active:scale-95"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <p className="text-[10px] text-text-muted text-center mt-2">
+          Enter to send · Shift+Enter for new line
+        </p>
       </form>
     </div>
   )

@@ -27,12 +27,10 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
   const [selectedModel, setSelectedModel] = useState<'claude' | 'deepseek' | 'ollama'>('claude')
   const [activeThreadId, setActiveThreadId] = useState<string | null>(threadId)
 
-  // Sync with parent threadId
   useEffect(() => {
     setActiveThreadId(threadId)
   }, [threadId])
 
-  // Load messages when thread changes
   useEffect(() => {
     if (activeThreadId) {
       loadMessages(activeThreadId)
@@ -94,7 +92,6 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
     if (isLoading) return
     setIsLoading(true)
 
-    // Ensure we have a thread
     let tid = activeThreadId
     if (!tid) {
       tid = await createThread(content)
@@ -104,7 +101,6 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
       }
     }
 
-    // Add user message to UI
     const userMessage: Message = {
       id: `msg-${Date.now()}`,
       role: 'user',
@@ -112,11 +108,8 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
       timestamp: new Date().toISOString(),
     }
     setMessages(prev => [...prev, userMessage])
-
-    // Save user message to DB
     saveMessage(tid!, 'user', content)
 
-    // Create assistant placeholder
     const assistantId = `msg-${Date.now() + 1}`
     const assistantMessage: Message = {
       id: assistantId,
@@ -127,7 +120,6 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
     setMessages(prev => [...prev, assistantMessage])
 
     try {
-      // Build message history for the API
       const allMessages = [...messages, userMessage].map(m => ({
         role: m.role,
         content: m.content,
@@ -160,7 +152,6 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
 
         buffer += decoder.decode(value, { stream: true })
         const lines = buffer.split('\n')
-        // Keep incomplete last line in buffer
         buffer = lines.pop() || ''
 
         for (const line of lines) {
@@ -233,7 +224,6 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
         }
       }
 
-      // Save assistant message to DB
       if (fullContent) {
         saveMessage(tid!, 'assistant', fullContent, usedModel)
       }
@@ -259,12 +249,9 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
-      {/* Header with model selector */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-sm font-medium text-gray-600 dark:text-gray-400">
-          {activeThreadId ? 'Chat' : 'New Chat'}
-        </h2>
+    <div className="flex flex-col flex-1 min-h-0 bg-surface-0">
+      {/* Model selector bar */}
+      <div className="flex items-center justify-end px-4 py-2">
         <ModelSelector value={selectedModel} onChange={setSelectedModel} />
       </div>
 
@@ -274,7 +261,7 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-200 dark:border-gray-700">
+      <div className="border-t border-white/5">
         <MessageInput
           onSend={handleSendMessage}
           onClear={handleClearChat}
