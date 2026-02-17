@@ -117,9 +117,9 @@ export async function POST(
       .single()
 
     if (error) {
-      console.error('[Messages POST] Database error:', JSON.stringify(error))
+      console.error('[Messages POST] Insert error:', JSON.stringify(error))
       return NextResponse.json(
-        { error: 'Failed to create message' },
+        { error: 'Failed to create message', dbError: JSON.stringify(error) },
         { status: 500 }
       )
     }
