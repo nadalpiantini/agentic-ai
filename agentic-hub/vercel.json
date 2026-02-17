@@ -5,21 +5,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install --legacy-peer-deps",
   "regions": ["iad1"],
-  "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key",
-    "ANTHROPIC_API_KEY": "@anthropic-api-key",
-    "DEEPSEEK_API_KEY": "@deepseek-api-key",
-    "OPENAI_API_KEY": "@openai-api-key",
-    "DATABASE_URL": "@database-url",
-    "DEFAULT_MODEL": "auto"
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key"
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
