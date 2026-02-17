@@ -19,16 +19,15 @@ export function createClaudeModel(): BaseChatModel {
   if (!apiKey) {
     throw new Error(
       "ANTHROPIC_API_KEY is required for Claude model. " +
-        "Set it in .env.local or skip Claude in router config."
+        "Set it in .env.local or Vercel Environment Variables."
     );
   }
 
   return new ChatAnthropic({
     apiKey,
-    modelName: "claude-3-5-sonnet-20241022",
+    modelName: "claude-sonnet-4-5-20250929",
     temperature: 0.7,
     maxTokens: 8192,
-    // Enable streaming for real-time responses
     streaming: true,
   });
 }

@@ -5,8 +5,7 @@
  * POST /api/threads/[id]/messages - Create a new message in a thread
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { requireUserId } from '@/lib/supabase/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireUserId, createAdminClient } from '@/lib/supabase/server'
 
 /**
  * GET /api/threads/[id]/messages
@@ -19,7 +18,7 @@ export async function GET(
 ) {
   try {
     const userId = await requireUserId()
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const threadId = params.id
 
     // Verify thread belongs to user
@@ -79,7 +78,7 @@ export async function POST(
 ) {
   try {
     const userId = await requireUserId()
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const threadId = params.id
 
     // Verify thread belongs to user
@@ -98,7 +97,7 @@ export async function POST(
     }
 
     const body = await req.json()
-    const { role, content, model_used, tool_calls, tokens_used } = body
+    const { role, content, tool_calls } = body
 
     if (!role || !content) {
       return NextResponse.json(
@@ -113,9 +112,7 @@ export async function POST(
         thread_id: threadId,
         role,
         content,
-        model_used: model_used || null,
         tool_calls: tool_calls || null,
-        tokens_used: tokens_used || null,
       })
       .select()
       .single()

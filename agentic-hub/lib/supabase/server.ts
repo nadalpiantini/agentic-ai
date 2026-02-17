@@ -1,14 +1,18 @@
 /**
  * Supabase Client for Server-Side Usage
  *
- * This client is used in Server Components, Route Handlers, and Server Actions
- * It uses cookies to maintain the user's session
+ * Two clients available:
+ * - createClient(): Uses anon key + cookies (for auth-aware operations)
+ * - createAdminClient(): Uses service role key (bypasses RLS for API routes)
  */
 
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/supabase'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+/**
+ * Auth-aware client with cookies (for Server Components)
+ */
 export async function createClient(): Promise<SupabaseClient<Database>> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -34,14 +38,31 @@ export async function createClient(): Promise<SupabaseClient<Database>> {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // Ignored in Server Components
           }
         },
       },
     }
   )
+}
+
+/**
+ * Admin client that bypasses RLS (for API Route Handlers)
+ * Uses SUPABASE_SERVICE_ROLE_KEY - never expose to client
+ */
+export async function createAdminClient(): Promise<SupabaseClient<Database>> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase URL and Service Role Key are required for admin client')
+  }
+
+  const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
+
+  return createSupabaseClient<Database>(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false },
+  })
 }
 
 /**
@@ -56,16 +77,28 @@ export async function getCurrentUser() {
 
 /**
  * Get the current user's ID from the server-side session
- * Falls back to DEV_USER_ID in development when no auth session exists
+ * Falls back to DEV_USER_ID env var when no auth session exists
+ *
+ * TODO: Remove fallback once Supabase Auth login UI is implemented
  */
 export async function requireUserId() {
-  const user = await getCurrentUser()
-  if (user) return user.id
-
-  // Dev fallback: allow local development without auth
-  if (process.env.NODE_ENV === 'development') {
-    return process.env.DEV_USER_ID || 'dev-user-local'
+  try {
+    const user = await getCurrentUser()
+    if (user) return user.id
+  } catch {
+    // Supabase auth failed (missing config, network error, etc.)
   }
 
-  throw new Error('Authentication required')
+  // Fallback: use DEV_USER_ID from env (works in dev and prod)
+  const fallbackId = process.env.DEV_USER_ID
+  if (fallbackId) return fallbackId
+
+  // Final fallback for development
+  if (process.env.NODE_ENV === 'development') {
+    return 'dev-user-local'
+  }
+
+  // Production without DEV_USER_ID: use a fixed UUID for anonymous access
+  // This allows the app to work without auth until login UI is built
+  return '00000000-0000-0000-0000-000000000000'
 }

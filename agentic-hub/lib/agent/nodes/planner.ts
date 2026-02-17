@@ -36,7 +36,7 @@ export async function plannerNode(
   if (llmCalls >= MAX_LLM_CALLS) {
     console.error("[Planner] Max LLM calls reached, terminating");
     return {
-      llmCalls: llmCalls + 1,
+      llmCalls: 1,
       next: "__end__",
     };
   }
@@ -70,7 +70,7 @@ export async function plannerNode(
       );
       return {
         messages: [result],
-        llmCalls: llmCalls + 1,
+        llmCalls: 1,
         next: "executor",
       };
     }
@@ -78,13 +78,13 @@ export async function plannerNode(
     console.log("[Planner] No tool calls, ending workflow");
     return {
       messages: [result],
-      llmCalls: llmCalls + 1,
+      llmCalls: 1,
       next: "__end__",
     };
   } catch (error) {
     console.error("[Planner] Error invoking model:", error);
     return {
-      llmCalls: llmCalls + 1,
+      llmCalls: 1,
       next: "__end__",
     };
   }

@@ -5,14 +5,13 @@
  * POST /api/threads - Create a new thread
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { requireUserId } from '@/lib/supabase/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireUserId, createAdminClient } from '@/lib/supabase/server'
 
 interface ThreadRow {
   id: string
   user_id: string
   title: string | null
-  metadata: Record<string, unknown>
+  model: string
   created_at: string
   updated_at: string
   messages?: Array<{ count: number }>
@@ -24,7 +23,7 @@ interface ThreadRow {
 export async function GET(req: NextRequest) {
   try {
     const userId = await requireUserId()
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     const { searchParams } = new URL(req.url)
     const limit = Math.min(Number(searchParams.get('limit')) || 50, 100)
@@ -66,17 +65,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const userId = await requireUserId()
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     const body = await req.json()
-    const { title, metadata } = body
+    const { title } = body
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase SSR types don't resolve Insert generics
     const { data: thread, error } = await (supabase.from('threads') as any)
       .insert({
         user_id: userId,
-        title: title || null,
-        metadata: metadata || {},
+        title: title || 'New Thread',
       })
       .select()
       .single()

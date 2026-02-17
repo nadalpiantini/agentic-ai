@@ -76,12 +76,12 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
     }
   }, [onThreadCreated])
 
-  const saveMessage = async (tid: string, role: string, content: string, modelUsed?: string) => {
+  const saveMessage = async (tid: string, role: string, content: string) => {
     try {
       await fetch(`/api/threads/${tid}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, content, model_used: modelUsed }),
+        body: JSON.stringify({ role, content }),
       })
     } catch (err) {
       console.error('Failed to save message:', err)
@@ -143,7 +143,6 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
       if (!reader) throw new Error('No reader available')
 
       let fullContent = ''
-      let usedModel = selectedModel
       let buffer = ''
 
       while (true) {
@@ -212,7 +211,7 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
                 break
 
               case 'done':
-                if (data.selectedModel) usedModel = data.selectedModel
+                // Model info available in data.selectedModel if needed
                 break
 
               case 'error':
@@ -225,7 +224,7 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
       }
 
       if (fullContent) {
-        saveMessage(tid!, 'assistant', fullContent, usedModel)
+        saveMessage(tid!, 'assistant', fullContent)
       }
     } catch (error) {
       console.error('Error sending message:', error)

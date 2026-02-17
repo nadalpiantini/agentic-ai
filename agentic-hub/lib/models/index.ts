@@ -15,26 +15,44 @@ import { getOllamaModel } from "./ollama";
 export type ModelType = "claude" | "deepseek" | "ollama";
 
 /**
- * Get model adapter by type
+ * Get model adapter by type, with automatic fallback if API key is missing
  */
 export function getModelAdapter(modelType: ModelType = "claude"): BaseChatModel {
   console.log(`[ModelAdapter] Initializing model: ${modelType}`);
 
-  switch (modelType) {
-    case "claude":
-      return getClaudeModel();
+  try {
+    switch (modelType) {
+      case "claude":
+        return getClaudeModel();
+      case "deepseek":
+        return getDeepSeekModel();
+      case "ollama":
+        return getOllamaModel();
+      default:
+        return getClaudeModel();
+    }
+  } catch (error) {
+    console.warn(`[ModelAdapter] Failed to init ${modelType}: ${(error as Error).message}`);
 
-    case "deepseek":
-      return getDeepSeekModel();
+    // Try fallback models in priority order
+    const fallbacks: ModelType[] = ["claude", "deepseek", "ollama"].filter(
+      (m) => m !== modelType
+    ) as ModelType[];
 
-    case "ollama":
-      return getOllamaModel();
+    for (const fallback of fallbacks) {
+      try {
+        console.log(`[ModelAdapter] Trying fallback: ${fallback}`);
+        switch (fallback) {
+          case "claude": return getClaudeModel();
+          case "deepseek": return getDeepSeekModel();
+          case "ollama": return getOllamaModel();
+        }
+      } catch {
+        continue;
+      }
+    }
 
-    default:
-      console.warn(
-        `[ModelAdapter] Unknown model type "${modelType}", falling back to claude`
-      );
-      return getClaudeModel();
+    throw new Error("No LLM model available. Set ANTHROPIC_API_KEY or DEEPSEEK_API_KEY.");
   }
 }
 

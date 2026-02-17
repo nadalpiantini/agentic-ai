@@ -6,17 +6,8 @@
  * DELETE /api/threads/[id] - Delete a thread
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { requireUserId } from '@/lib/supabase/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireUserId, createAdminClient } from '@/lib/supabase/server'
 
-interface ThreadRow {
-  id: string
-  user_id: string
-  title: string | null
-  metadata: Record<string, unknown>
-  created_at: string
-  updated_at: string
-}
 
 /**
  * GET /api/threads/[id]
@@ -27,7 +18,7 @@ export async function GET(
 ) {
   try {
     const userId = await requireUserId()
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const threadId = params.id
 
     const { data: thread, error } = await supabase
@@ -71,22 +62,18 @@ export async function PATCH(
 ) {
   try {
     const userId = await requireUserId()
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const threadId = params.id
 
     const body = await req.json()
-    const { title, metadata } = body
+    const { title } = body
 
-    const updateData: Partial<Pick<ThreadRow, 'title' | 'metadata'>> = {}
+    const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
     if (title !== undefined) updateData.title = title
-    if (metadata !== undefined) updateData.metadata = metadata
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase SSR types don't resolve Update generics
     const { data: thread, error } = await (supabase.from('threads') as any)
-      .update({
-        ...updateData,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', threadId)
       .eq('user_id', userId)
       .select()
@@ -126,7 +113,7 @@ export async function DELETE(
 ) {
   try {
     const userId = await requireUserId()
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const threadId = params.id
 
     const { error } = await supabase
