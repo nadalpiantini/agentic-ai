@@ -14,12 +14,12 @@ import { requireUserId, createAdminClient } from '@/lib/supabase/server'
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = await requireUserId()
     const supabase = await createAdminClient()
-    const threadId = params.id
+    const { id: threadId } = await params
 
     const { data: thread, error } = await supabase
       .from('threads')
@@ -58,12 +58,12 @@ export async function GET(
  */
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = await requireUserId()
     const supabase = await createAdminClient()
-    const threadId = params.id
+    const { id: threadId } = await params
 
     const body = await req.json()
     const { title } = body
@@ -109,12 +109,12 @@ export async function PATCH(
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = await requireUserId()
     const supabase = await createAdminClient()
-    const threadId = params.id
+    const { id: threadId } = await params
 
     const { error } = await supabase
       .from('threads')

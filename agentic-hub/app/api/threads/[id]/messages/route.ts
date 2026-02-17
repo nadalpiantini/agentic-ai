@@ -14,12 +14,12 @@ import { requireUserId, createAdminClient } from '@/lib/supabase/server'
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = await requireUserId()
     const supabase = await createAdminClient()
-    const threadId = params.id
+    const { id: threadId } = await params
 
     // Verify thread belongs to user
     const { data: thread, error: threadError } = await supabase
@@ -74,12 +74,12 @@ export async function GET(
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = await requireUserId()
     const supabase = await createAdminClient()
-    const threadId = params.id
+    const { id: threadId } = await params
 
     // Verify thread belongs to user
     const { data: thread, error: threadError } = await supabase

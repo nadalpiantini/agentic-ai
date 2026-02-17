@@ -7,16 +7,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireUserId, createAdminClient } from '@/lib/supabase/server'
 
-interface ThreadRow {
-  id: string
-  user_id: string
-  title: string | null
-  model: string
-  created_at: string
-  updated_at: string
-  messages?: Array<{ count: number }>
-}
-
 /**
  * GET /api/threads
  */
@@ -31,25 +21,20 @@ export async function GET(req: NextRequest) {
 
     const { data: threads, error } = await supabase
       .from('threads')
-      .select('*, messages(count)')
+      .select('*')
       .eq('user_id', userId)
       .order('updated_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
     if (error) {
-      console.error('[Threads GET] Database error:', error)
+      console.error('[Threads GET] Database error:', JSON.stringify(error))
       return NextResponse.json(
         { error: 'Failed to fetch threads' },
         { status: 500 }
       )
     }
 
-    const transformedThreads = (threads as ThreadRow[] | null)?.map((thread) => ({
-      ...thread,
-      messageCount: thread.messages?.[0]?.count || 0,
-    })) || []
-
-    return NextResponse.json(transformedThreads)
+    return NextResponse.json(threads || [])
   } catch (error) {
     console.error('[Threads GET] Auth error:', error)
     return NextResponse.json(
