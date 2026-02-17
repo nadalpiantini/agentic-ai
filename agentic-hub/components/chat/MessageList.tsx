@@ -19,16 +19,16 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-            <div className="w-12 h-12 rounded-xl bg-brand-600/10 flex items-center justify-center mb-4">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-brand-400">
+            <div className="w-16 h-16 rounded-2xl bg-brand-600/10 flex items-center justify-center mb-6">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-brand-400">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <p className="text-lg font-medium text-text-secondary mb-1">Start a conversation</p>
-            <p className="text-sm text-text-muted">Ask anything. The agent will use tools when needed.</p>
+            <p className="text-xl font-medium text-text-secondary mb-2">Start a conversation</p>
+            <p className="text-base text-text-muted">Ask anything. The agent will use tools when needed.</p>
           </div>
         ) : (
           messages.map((message) => (
