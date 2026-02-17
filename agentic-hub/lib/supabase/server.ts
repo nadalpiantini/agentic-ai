@@ -56,12 +56,16 @@ export async function getCurrentUser() {
 
 /**
  * Get the current user's ID from the server-side session
- * Throws an error if not authenticated
+ * Falls back to DEV_USER_ID in development when no auth session exists
  */
 export async function requireUserId() {
   const user = await getCurrentUser()
-  if (!user) {
-    throw new Error('Authentication required')
+  if (user) return user.id
+
+  // Dev fallback: allow local development without auth
+  if (process.env.NODE_ENV === 'development') {
+    return process.env.DEV_USER_ID || 'dev-user-local'
   }
-  return user.id
+
+  throw new Error('Authentication required')
 }

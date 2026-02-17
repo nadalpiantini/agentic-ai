@@ -27,7 +27,7 @@ export default function HomePage() {
         </p>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
           <Link
-            href="/monitoring"
+            href="/chat"
             style={{
               padding: '16px 32px',
               background: '#2563eb',
@@ -37,7 +37,20 @@ export default function HomePage() {
               fontWeight: '500',
             }}
           >
-            Monitoring Dashboard
+            Start Chat
+          </Link>
+          <Link
+            href="/monitoring"
+            style={{
+              padding: '16px 32px',
+              background: '#374151',
+              color: 'white',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              fontWeight: '500',
+            }}
+          >
+            Monitoring
           </Link>
         </div>
         <div style={{ marginTop: '64px', fontSize: '14px', color: '#9ca3af' }}>
