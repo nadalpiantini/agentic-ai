@@ -132,10 +132,11 @@ export async function POST(
 
     return NextResponse.json(message, { status: 201 })
   } catch (error) {
-    console.error('[Messages POST] Auth error:', error)
+    console.error('[Messages POST] Unhandled error:', error)
+    const msg = error instanceof Error ? error.message : String(error)
     return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401 }
+      { error: 'Internal server error', details: msg },
+      { status: 500 }
     )
   }
 }
