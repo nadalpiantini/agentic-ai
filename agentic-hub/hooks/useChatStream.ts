@@ -1,11 +1,15 @@
 import { useState, useCallback, useRef } from "react";
 import { Message } from "@/types";
 
+interface ToolCallInput {
+  [key: string]: unknown;
+}
+
 interface UseChatStreamOptions {
   threadId?: string;
   selectedModel?: "claude" | "deepseek" | "ollama";
   onStreamComplete?: (threadId: string) => void;
-  onToolCall?: (tool: string, input: any) => void;
+  onToolCall?: (tool: string, input: ToolCallInput) => void;
 }
 
 export function useChatStream({
@@ -74,7 +78,7 @@ export function useChatStream({
         }
 
         let fullContent = "";
-        let finalThreadId = threadId;
+        const finalThreadId = threadId;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -106,7 +110,7 @@ export function useChatStream({
                     // Notify that a tool is being executed
                     console.log("[useChatStream] Tool started:", data.tool, data.input);
                     if (onToolCall) {
-                      onToolCall(data.tool, data.input);
+                      onToolCall(data.tool, data.input as ToolCallInput);
                     }
                     // Append tool notification to message
                     fullContent += `\n[Using tool: ${data.tool}...]\n`;
@@ -139,7 +143,7 @@ export function useChatStream({
                   case "message":
                     // Final message (non-streamed)
                     if (data.role === "assistant") {
-                      fullContent = data.content;
+                      fullContent = data.content as string;
                       setMessages((prev) =>
                         prev.map((msg) =>
                           msg.id === assistantMessage.id
@@ -153,13 +157,13 @@ export function useChatStream({
                   case "error":
                     // Error occurred
                     console.error("[useChatStream] Error:", data.error);
-                    setError(data.error);
+                    setError(data.error as string);
                     setMessages((prev) =>
                       prev.map((msg) =>
                         msg.id === assistantMessage.id
                           ? {
                               ...msg,
-                              content: `Error: ${data.error}. Please try again.`,
+                              content: `Error: ${data.error as string}. Please try again.`,
                             }
                           : msg
                       )

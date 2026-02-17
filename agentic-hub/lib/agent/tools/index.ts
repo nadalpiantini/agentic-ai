@@ -1,5 +1,5 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { z } from "zod";
+import { ZodObject, ZodRawShape } from "zod";
 import { supabaseTools } from "./supabase";
 import { httpTools } from "./http";
 import { ragTools } from "./rag";
@@ -11,15 +11,23 @@ import { ragTools } from "./rag";
  * that can be used by the LLM planner.
  */
 
+interface ToolDefinition {
+  name: string;
+  description: string;
+  schema: ZodObject<ZodRawShape>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Tool handlers have varying signatures from Zod inference
+  handler: (...args: any[]) => Promise<unknown>;
+}
+
 /**
  * Convert our tool definitions to LangChain DynamicStructuredTool
  */
-function createLangChainTool(tool: any): DynamicStructuredTool<any> {
+function createLangChainTool(tool: ToolDefinition): DynamicStructuredTool {
   return new DynamicStructuredTool({
     name: tool.name,
     description: tool.description,
     schema: tool.schema,
-    func: async (input: any) => {
+    func: async (input: Record<string, unknown>) => {
       try {
         const result = await tool.handler(input);
         return JSON.stringify(result);
@@ -50,14 +58,14 @@ export const allTools = [
 /**
  * Get tool by name
  */
-export function getToolByName(name: string): DynamicStructuredTool<any> | undefined {
+export function getToolByName(name: string): DynamicStructuredTool | undefined {
   return allTools.find((tool) => tool.name === name);
 }
 
 /**
  * Get tools by category/prefix
  */
-export function getToolsByPrefix(prefix: string): DynamicStructuredTool<any>[] {
+export function getToolsByPrefix(prefix: string): DynamicStructuredTool[] {
   return allTools.filter((tool) => tool.name.startsWith(prefix));
 }
 

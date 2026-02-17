@@ -71,7 +71,7 @@ export async function GET() {
     }
 
     health.checks.database = "ok";
-  } catch (error) {
+  } catch {
     health.checks.database = "error";
     health.status = "degraded";
     return NextResponse.json(health, { status: 503 });

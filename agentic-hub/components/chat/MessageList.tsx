@@ -6,6 +6,7 @@ import { AssistantMessage } from './AssistantMessage'
 
 interface MessageListProps {
   messages: Message[]
+  isLoading?: boolean
 }
 
 export function MessageList({ messages }: MessageListProps) {

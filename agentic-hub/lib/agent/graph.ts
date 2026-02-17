@@ -3,6 +3,11 @@ import { AgentState } from "./state";
 import { routerNode } from "./nodes/router";
 import { plannerNode } from "./nodes/planner";
 import { executorNode } from "./nodes/executor";
+import { BaseMessage } from "@langchain/core/messages";
+
+interface ToolCallMessage extends BaseMessage {
+  tool_calls?: Array<{ name: string; args: Record<string, unknown>; id: string }>;
+}
 
 /**
  * LangGraph StateGraph for Agentic Hub workflow
@@ -38,10 +43,12 @@ export function createAgentGraph() {
     // State transition function
     (state: typeof AgentState.State) => {
       const latestMessage = state.messages[state.messages.length - 1];
-      // TODO: Check for tool_calls in AI message
-      // For now, we check if the node returned next: "executor"
-      // const hasToolCalls = latestMessage?.tool_calls?.length > 0;
-      const hasToolCalls = false; // Placeholder
+      const msgWithToolCalls = latestMessage as ToolCallMessage | undefined;
+      const hasToolCalls =
+        latestMessage &&
+        "tool_calls" in (msgWithToolCalls || {}) &&
+        Array.isArray(msgWithToolCalls?.tool_calls) &&
+        msgWithToolCalls.tool_calls.length > 0;
 
       return hasToolCalls ? "executor" : END;
     },
@@ -65,11 +72,9 @@ export function createAgentGraph() {
         return END;
       }
 
-      // TODO: Check if executor completed all tool calls
-      // const hasMoreWork = checkForRemainingToolCalls(state);
-      const hasMoreWork = false; // Placeholder
-
-      return hasMoreWork ? "planner" : END;
+      // After executor runs, always loop back to planner so
+      // the LLM can process tool results and decide next step
+      return "planner";
     },
     {
       planner: "planner",

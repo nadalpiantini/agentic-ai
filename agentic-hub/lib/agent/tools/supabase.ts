@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Supabase Tools - CRUD operations for database access
@@ -10,9 +11,9 @@ import { z } from "zod";
  * - Deleting records with RLS enforcement
  */
 
-let supabaseClient: any = null;
+let supabaseClient: SupabaseClient | null = null;
 
-function getSupabaseClient() {
+function getSupabaseClient(): SupabaseClient {
   if (!supabaseClient) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -21,7 +22,6 @@ function getSupabaseClient() {
       throw new Error('Supabase credentials not configured');
     }
 
-    const { createClient } = require("@supabase/supabase-js");
     supabaseClient = createClient(supabaseUrl, supabaseKey);
   }
 
@@ -142,11 +142,11 @@ export async function createMessage(args: {
 export async function updateThread(args: {
   threadId: string;
   title?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }) {
   const { threadId, title, metadata } = args;
 
-  const updateData: any = {};
+  const updateData: { title?: string; metadata?: Record<string, unknown> } = {};
   if (title) updateData.title = title;
   if (metadata) updateData.metadata = metadata;
 
@@ -213,7 +213,7 @@ export const supabaseTools = [
     schema: z.object({
       threadId: z.string(),
       title: z.string().optional(),
-      metadata: z.record(z.string(), z.any()).optional(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
     }),
     handler: updateThread,
   },

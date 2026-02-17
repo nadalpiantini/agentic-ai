@@ -3,7 +3,7 @@ export interface Message {
   thread_id?: string;
   role: "user" | "assistant" | "system";
   content: string;
-  tool_calls?: any[];
+  tool_calls?: Array<{ name: string; args: Record<string, unknown>; id?: string }>;
   model_used?: string;
   tokens_used?: number;
   created_at?: string;
@@ -14,7 +14,7 @@ export interface Thread {
   id: string;
   user_id: string;
   title: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   preferred_model: string;
   created_at: string;
   updated_at: string;

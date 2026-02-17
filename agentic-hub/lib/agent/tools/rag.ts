@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * RAG Tools - Vector search with pgvector
@@ -9,9 +10,9 @@ import { z } from "zod";
  * - Context-aware knowledge base queries
  */
 
-let supabaseClient: any = null;
+let supabaseClient: SupabaseClient | null = null;
 
-function getSupabaseClient() {
+function getSupabaseClient(): SupabaseClient {
   if (!supabaseClient) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -20,7 +21,6 @@ function getSupabaseClient() {
       throw new Error('Supabase credentials not configured');
     }
 
-    const { createClient } = require("@supabase/supabase-js");
     supabaseClient = createClient(supabaseUrl, supabaseKey);
   }
 
@@ -40,7 +40,6 @@ export async function semanticSearch(args: {
 
   try {
     // Generate embedding for query (using OpenAI or similar)
-    // For now, this is a placeholder - in production you'd call an embedding API
     const queryEmbedding = await generateEmbedding(query);
 
     let queryBuilder = getSupabaseClient().rpc("match_documents", {
@@ -75,7 +74,7 @@ export async function semanticSearch(args: {
 export async function addDocument(args: {
   userId?: string;
   content: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }) {
   const { userId, content, metadata } = args;
 
@@ -108,16 +107,10 @@ export async function addDocument(args: {
 }
 
 /**
- * Generate embedding for text (placeholder)
- * In production, this would call OpenAI's embedding API or similar
+ * Generate embedding for text
+ * Uses OpenAI's embedding API
  */
 async function generateEmbedding(text: string): Promise<number[]> {
-  // TODO: Integrate with actual embedding API
-  // For now, return a dummy embedding
-  // This should be replaced with:
-  // - OpenAI embeddings (text-embedding-3-small)
-  // - Or local embeddings (transformers.js)
-
   const response = await fetch("https://api.openai.com/v1/embeddings", {
     method: "POST",
     headers: {
@@ -157,7 +150,7 @@ export const ragTools = [
     schema: z.object({
       userId: z.string().optional(),
       content: z.string(),
-      metadata: z.record(z.string(), z.any()).optional(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
     }),
     handler: addDocument,
   },

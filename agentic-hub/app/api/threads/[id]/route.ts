@@ -8,14 +8,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireUserId } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
-import type { Json } from '@/types/supabase'
+
+interface ThreadRow {
+  id: string
+  user_id: string
+  title: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
 
 /**
  * GET /api/threads/[id]
- *
- * Get a specific thread by ID
- *
- * Response: JSON object with thread data
  */
 export async function GET(
   req: NextRequest,
@@ -26,7 +30,6 @@ export async function GET(
     const supabase = await createClient()
     const threadId = params.id
 
-    // Fetch thread
     const { data: thread, error } = await supabase
       .from('threads')
       .select()
@@ -61,14 +64,6 @@ export async function GET(
 
 /**
  * PATCH /api/threads/[id]
- *
- * Update a thread (title, metadata)
- *
- * Request body:
- * - title: string - Optional new title
- * - metadata: object - Optional new metadata
- *
- * Response: JSON object with updated thread
  */
 export async function PATCH(
   req: NextRequest,
@@ -79,19 +74,14 @@ export async function PATCH(
     const supabase = await createClient()
     const threadId = params.id
 
-    // Parse request body
     const body = await req.json()
     const { title, metadata } = body
 
-    // Build update object with proper typing
-    const updateData: {
-      title?: string | null
-      metadata?: Json
-    } = {}
+    const updateData: Partial<Pick<ThreadRow, 'title' | 'metadata'>> = {}
     if (title !== undefined) updateData.title = title
     if (metadata !== undefined) updateData.metadata = metadata
 
-    // Update thread
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase SSR types don't resolve Update generics
     const { data: thread, error } = await (supabase.from('threads') as any)
       .update({
         ...updateData,
@@ -129,10 +119,6 @@ export async function PATCH(
 
 /**
  * DELETE /api/threads/[id]
- *
- * Delete a thread and all its messages
- *
- * Response: 204 No Content
  */
 export async function DELETE(
   req: NextRequest,
@@ -143,7 +129,6 @@ export async function DELETE(
     const supabase = await createClient()
     const threadId = params.id
 
-    // Delete thread (messages will be deleted by cascade)
     const { error } = await supabase
       .from('threads')
       .delete()

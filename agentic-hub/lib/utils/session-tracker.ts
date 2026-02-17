@@ -14,6 +14,11 @@ interface SessionEvent {
   metadata?: Record<string, unknown>;
 }
 
+interface ActivityLogRow {
+  event_type: string;
+  created_at: string;
+}
+
 let supabaseClient: ReturnType<typeof createServerClient> | null = null;
 
 function getSupabaseClient() {
@@ -40,8 +45,8 @@ export class SessionTracker {
         model_selected: "model_selected",
       };
 
-      await (supabase
-        .from("activity_logs")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase untyped client for activity_logs
+      await (supabase.from("activity_logs") as any)
         .insert({
           event_type: eventTypeMap[event.type],
           user_id: event.userId,
@@ -51,7 +56,7 @@ export class SessionTracker {
             ...event.metadata,
           },
           created_at: new Date().toISOString(),
-        } as any));
+        });
     } catch (error) {
       console.error("[SessionTracker] Failed to track event:", error);
     }
@@ -85,7 +90,7 @@ export class SessionTracker {
         query = query.in("event_type", eventTypes);
       }
 
-      const { data, error } = (await query) as any;
+      const { data, error } = (await query) as { data: ActivityLogRow[] | null; error: unknown };
 
       if (error) throw error;
       return data || [];
@@ -107,24 +112,25 @@ export class SessionTracker {
     try {
       const { data, error } = (await supabase
         .from("activity_logs")
-        .select("event_type")
+        .select("event_type, created_at")
         .eq("user_id", userId)
-        .gte("created_at", thresholdTime)) as any;
+        .gte("created_at", thresholdTime)) as { data: ActivityLogRow[] | null; error: unknown };
 
       if (error) throw error;
 
+      const logs = data || [];
       const stats = {
-        totalEvents: (data || []).length,
+        totalEvents: logs.length,
         eventBreakdown: {} as Record<string, number>,
         lastActivity: null as string | null,
       };
 
-      (data || []).forEach((log: any) => {
+      logs.forEach((log) => {
         stats.eventBreakdown[log.event_type] = (stats.eventBreakdown[log.event_type] || 0) + 1;
       });
 
-      if (data && data.length > 0) {
-        stats.lastActivity = (data[0] as any).created_at;
+      if (logs.length > 0) {
+        stats.lastActivity = logs[0].created_at;
       }
 
       return stats;

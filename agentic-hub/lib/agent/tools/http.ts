@@ -43,7 +43,7 @@ export async function httpGet(args: { url: string; headers?: Record<string, stri
  */
 export async function httpPost(args: {
   url: string;
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string>;
 }) {
   const { url, body, headers = {} } = args;
@@ -76,7 +76,7 @@ export async function httpPost(args: {
  */
 export async function httpPut(args: {
   url: string;
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string>;
 }) {
   const { url, body, headers = {} } = args;

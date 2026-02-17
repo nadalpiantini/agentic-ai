@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient as createServerClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ function createAdminClient() {
   return createServerClient(url, serviceRoleKey);
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const supabase = createAdminClient();
 

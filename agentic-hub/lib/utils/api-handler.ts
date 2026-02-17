@@ -20,17 +20,6 @@ type APIHandlerFn = (
   context: APIHandlerContext
 ) => Promise<{ data?: unknown; statusCode?: number }>;
 
-const ERROR_SEVERITY_MAP: Record<string, "low" | "medium" | "high" | "critical"> = {
-  ValidationError: "low",
-  NotFoundError: "low",
-  UnauthorizedError: "medium",
-  ForbiddenError: "medium",
-  DatabaseError: "high",
-  ServiceError: "high",
-  TimeoutError: "high",
-  InternalError: "critical",
-};
-
 function getErrorStatusCode(error: unknown): number {
   if (error instanceof Error) {
     if (error.message.includes("Unauthorized")) return 401;
@@ -76,7 +65,7 @@ export function createAPIHandler(
           if (bodyText) {
             bodyData = JSON.parse(bodyText);
           }
-        } catch (e) {
+        } catch {
           // Body parsing failed, continue without it
         }
       }

@@ -1,5 +1,4 @@
 import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
-import { Pool } from "pg";
 
 /**
  * Checkpointer for LangGraph state persistence
@@ -27,17 +26,6 @@ import { Pool } from "pg";
  */
 export async function createCheckpointer(): Promise<PostgresSaver> {
   // Placeholder: Initialize PostgreSQL connection pool
-  // TODO: Implement proper connection pooling and error handling
-  const poolConfig = {
-    connectionString: process.env.DATABASE_URL,
-    // TODO: Add connection pool configuration
-    // max: 20,
-    // idleTimeoutMillis: 30000,
-    // connectionTimeoutMillis: 2000,
-  };
-
-  // Placeholder: Create pool
-  // const pool = new Pool(poolConfig);
 
   // TODO: Initialize PostgresSaver with connection pool
   // const checkpointer = await PostgresSaver.fromConnString(poolConfig.connectionString);

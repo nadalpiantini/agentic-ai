@@ -1,6 +1,15 @@
+import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { AgentState } from "../state";
 import { getModelAdapter } from "../../models";
 import { allTools } from "../tools";
+
+interface ToolBindableModel extends BaseChatModel {
+  bindTools(tools: unknown[]): BaseChatModel;
+}
+
+function hasBindTools(model: BaseChatModel): model is ToolBindableModel {
+  return typeof (model as ToolBindableModel).bindTools === 'function';
+}
 
 /**
  * Planner Node - LLM invocation and response generation
@@ -40,10 +49,8 @@ export async function plannerNode(
     // Initialize model adapter
     const model = getModelAdapter(selectedModel);
 
-    // Bind tools to model (check if bindTools exists)
-    const modelWithTools = (model as any).bindTools
-      ? (model as any).bindTools(allTools)
-      : model;
+    // Bind tools to model if supported
+    const modelWithTools = hasBindTools(model) ? model.bindTools(allTools) : model;
 
     // Invoke model with current state
     const result = await modelWithTools.invoke(messages);
@@ -59,7 +66,7 @@ export async function plannerNode(
     if (hasToolCalls) {
       console.log(
         "[Planner] Tool calls detected:",
-        result.tool_calls.map((tc: any) => tc.name).join(", ")
+        result.tool_calls!.map((tc: { name: string }) => tc.name).join(", ")
       );
       return {
         messages: [result],

@@ -33,8 +33,6 @@ interface MetricLog extends LogContext {
   unit: string;
 }
 
-type LogEntry = RequestLog | ErrorLog | MetricLog;
-
 let supabaseClient: ReturnType<typeof createServerClient> | null = null;
 
 function getSupabaseClient() {
@@ -72,8 +70,8 @@ export class Logger {
 
     try {
       const supabase = getSupabaseClient();
-      await (supabase
-        .from("api_requests")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase untyped client for logging tables
+      await (supabase.from("api_requests") as any)
         .insert({
           request_id: entry.requestId,
           method: entry.method,
@@ -88,7 +86,7 @@ export class Logger {
             ...entry.metadata,
           },
           created_at: new Date(entry.timestamp).toISOString(),
-        } as any));
+        });
     } catch (err) {
       console.error("[Logger] Failed to log request:", err);
     }
@@ -121,8 +119,8 @@ export class Logger {
 
     try {
       const supabase = getSupabaseClient();
-      await (supabase
-        .from("activity_logs")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase untyped client for logging tables
+      await (supabase.from("activity_logs") as any)
         .insert({
           event_type: "error",
           user_id: entry.userId,
@@ -137,7 +135,7 @@ export class Logger {
             ...entry.metadata,
           },
           created_at: new Date(entry.timestamp).toISOString(),
-        } as any));
+        });
     } catch (err) {
       console.error("[Logger] Failed to log error:", err);
     }
@@ -159,8 +157,8 @@ export class Logger {
 
     try {
       const supabase = getSupabaseClient();
-      await (supabase
-        .from("metrics")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase untyped client for logging tables
+      await (supabase.from("metrics") as any)
         .insert({
           metric_name: entry.metric,
           metric_value: entry.value,
@@ -172,7 +170,7 @@ export class Logger {
             ...entry.metadata,
           },
           recorded_at: new Date(entry.timestamp).toISOString(),
-        } as any));
+        });
     } catch (err) {
       console.error("[Logger] Failed to log metric:", err);
     }
@@ -181,7 +179,6 @@ export class Logger {
 
 export function sanitizeErrorMessage(error: unknown): string {
   if (error instanceof Error) {
-    // Don't expose internal details in production
     if (error.message.includes("password")) return "Authentication error";
     if (error.message.includes("API key")) return "Service configuration error";
     return error.message;

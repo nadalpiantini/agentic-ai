@@ -22,14 +22,31 @@ import { requireUserId } from "@/lib/supabase/server";
 import { agentGraph } from "@/lib/agent/graph";
 import { HumanMessage, AIMessage, ToolMessage } from "@langchain/core/messages";
 
+interface MessageInput {
+  role: string;
+  content: string;
+  name?: string;
+  toolCallId?: string;
+}
+
+interface StreamChunk {
+  type: "token" | "tool_start" | "tool_end" | "done" | "error";
+  content?: string;
+  tool?: string;
+  input?: string;
+  error?: string;
+  llmCalls?: number;
+  selectedModel?: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    // Authenticate user
-    const userId = await requireUserId();
+    // Authenticate user (currently unused but required for auth)
+    await requireUserId();
 
     // Parse request body
     const body = await req.json();
-    const { threadId, messages, selectedModel } = body;
+    const { messages, selectedModel } = body;
 
     // Validate input
     if (!messages || !Array.isArray(messages)) {
@@ -37,13 +54,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Convert messages to LangChain format
-    const langchainMessages = messages.map((msg: any) => {
+    const langchainMessages = messages.map((msg: MessageInput) => {
       if (msg.role === "user") {
         return new HumanMessage(msg.content);
       } else if (msg.role === "assistant") {
         return new AIMessage(msg.content);
       } else if (msg.role === "tool") {
-        return new ToolMessage({ content: msg.content, name: msg.name, tool_call_id: msg.toolCallId });
+        return new ToolMessage({ content: msg.content, name: msg.name || "unknown", tool_call_id: msg.toolCallId || "" });
       }
       throw new Error(`Unsupported message role: ${msg.role}`);
     });
@@ -68,20 +85,20 @@ export async function POST(req: NextRequest) {
                 {
                   handleLLMNewToken(token: string) {
                     // Stream each token as it's generated
-                    const chunk = {
+                    const chunk: StreamChunk = {
                       type: "token",
                       content: token,
                     };
 
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
                   },
-                  handleLLMEnd(output: any) {
+                  handleLLMEnd() {
                     console.log("[Agent Stream] LLM generation complete");
                   },
-                  handleToolStart(tool: any, input: any) {
+                  handleToolStart(tool: unknown, input: string) {
                     // Notify that a tool is being executed
-                    const toolName = typeof tool === "string" ? tool : tool.name || "unknown";
-                    const chunk = {
+                    const toolName = typeof tool === "string" ? tool : (tool as { name?: string }).name || "unknown";
+                    const chunk: StreamChunk = {
                       type: "tool_start",
                       tool: toolName,
                       input,
@@ -89,13 +106,12 @@ export async function POST(req: NextRequest) {
 
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
                   },
-                  handleToolEnd(tool: any, output: any) {
+                  handleToolEnd(tool: unknown) {
                     // Notify that tool execution is complete
-                    const toolName = typeof tool === "string" ? tool : tool.name || "unknown";
-                    const chunk = {
+                    const toolName = typeof tool === "string" ? tool : (tool as { name?: string }).name || "unknown";
+                    const chunk: StreamChunk = {
                       type: "tool_end",
                       tool: toolName,
-                      output,
                     };
 
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
@@ -112,10 +128,8 @@ export async function POST(req: NextRequest) {
             // Skip messages that were already streamed
             if (message.getType() === "human") continue;
 
-            const chunk = {
-              type: "message",
-              content: message.content,
-              role: message.getType(),
+            const chunk: StreamChunk = {
+              type: "done",
             };
 
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
@@ -128,13 +142,13 @@ export async function POST(req: NextRequest) {
                 type: "done",
                 llmCalls: result.llmCalls,
                 selectedModel: result.selectedModel,
-              })}\n\n`
+              } satisfies StreamChunk)}\n\n`
             )
           );
           controller.close();
         } catch (error) {
           console.error("[Agent Stream] Error:", error);
-          const errorChunk = {
+          const errorChunk: StreamChunk = {
             type: "error",
             error: error instanceof Error ? error.message : "Unknown error",
           };

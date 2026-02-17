@@ -109,8 +109,11 @@ test.describe("Agentic Hub - Complete User Journey", () => {
 
     // Check for proper viewport
     const viewport = page.viewportSize();
-    expect(viewport.width).toBeGreaterThan(0);
-    expect(viewport.height).toBeGreaterThan(0);
+    expect(viewport).not.toBeNull();
+    if (viewport) {
+      expect(viewport.width).toBeGreaterThan(0);
+      expect(viewport.height).toBeGreaterThan(0);
+    }
   });
 
   test("accessibility: keyboard navigation works", async ({ page }) => {

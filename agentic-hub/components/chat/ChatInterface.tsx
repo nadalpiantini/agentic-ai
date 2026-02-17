@@ -1,47 +1,146 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Message } from '@/types'
 import { MessageList } from './MessageList'
 import { MessageInput } from './MessageInput'
+import { ModelSelector } from './ModelSelector'
 
 interface ChatInterfaceProps {
   threadId: string | null
   onNewThread?: () => void
+  onThreadCreated?: (threadId: string) => void
 }
 
-export function ChatInterface({ threadId, onNewThread }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([])
+interface MessageDB {
+  id: string
+  thread_id: string
+  role: string
+  content: string
+  model_used?: string
+  created_at: string
+}
 
-  const handleSendMessage = async (content: string) => {
+export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatInterfaceProps) {
+  const [messages, setMessages] = useState<Message[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [selectedModel, setSelectedModel] = useState<'claude' | 'deepseek' | 'ollama'>('claude')
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(threadId)
+
+  // Sync with parent threadId
+  useEffect(() => {
+    setActiveThreadId(threadId)
+  }, [threadId])
+
+  // Load messages when thread changes
+  useEffect(() => {
+    if (activeThreadId) {
+      loadMessages(activeThreadId)
+    } else {
+      setMessages([])
+    }
+  }, [activeThreadId])
+
+  const loadMessages = async (tid: string) => {
+    try {
+      const res = await fetch(`/api/threads/${tid}/messages`)
+      if (!res.ok) return
+      const data = await res.json()
+      setMessages(data.map((m: MessageDB) => ({
+        id: m.id,
+        thread_id: m.thread_id,
+        role: m.role as 'user' | 'assistant' | 'system',
+        content: m.content,
+        model_used: m.model_used,
+        timestamp: m.created_at,
+      })))
+    } catch (err) {
+      console.error('Failed to load messages:', err)
+    }
+  }
+
+  const createThread = useCallback(async (firstMessage: string): Promise<string | null> => {
+    try {
+      const title = firstMessage.slice(0, 80) + (firstMessage.length > 80 ? '...' : '')
+      const res = await fetch('/api/threads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      })
+      if (!res.ok) throw new Error('Failed to create thread')
+      const thread = await res.json()
+      setActiveThreadId(thread.id)
+      onThreadCreated?.(thread.id)
+      return thread.id
+    } catch (err) {
+      console.error('Failed to create thread:', err)
+      return null
+    }
+  }, [onThreadCreated])
+
+  const saveMessage = async (tid: string, role: string, content: string, modelUsed?: string) => {
+    try {
+      await fetch(`/api/threads/${tid}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role, content, model_used: modelUsed }),
+      })
+    } catch (err) {
+      console.error('Failed to save message:', err)
+    }
+  }
+
+  const handleSendMessage = useCallback(async (content: string) => {
+    if (isLoading) return
+    setIsLoading(true)
+
+    // Ensure we have a thread
+    let tid = activeThreadId
+    if (!tid) {
+      tid = await createThread(content)
+      if (!tid) {
+        setIsLoading(false)
+        return
+      }
+    }
+
+    // Add user message to UI
     const userMessage: Message = {
       id: `msg-${Date.now()}`,
       role: 'user',
       content,
       timestamp: new Date().toISOString(),
     }
-
     setMessages(prev => [...prev, userMessage])
 
-    // Add assistant placeholder
+    // Save user message to DB
+    saveMessage(tid!, 'user', content)
+
+    // Create assistant placeholder
+    const assistantId = `msg-${Date.now() + 1}`
     const assistantMessage: Message = {
-      id: `msg-${Date.now() + 1}`,
+      id: assistantId,
       role: 'assistant',
       content: '',
       timestamp: new Date().toISOString(),
     }
-
     setMessages(prev => [...prev, assistantMessage])
 
     try {
-      const endpoint = threadId
-        ? `/api/agent/stream?thread_id=${threadId}`
-        : '/api/agent/stream'
+      // Build message history for the API
+      const allMessages = [...messages, userMessage].map(m => ({
+        role: m.role,
+        content: m.content,
+      }))
 
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/agent/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: content }),
+        body: JSON.stringify({
+          threadId: tid,
+          messages: allMessages,
+          selectedModel,
+        }),
       })
 
       if (!response.ok) throw new Error('Failed to send message')
@@ -52,59 +151,134 @@ export function ChatInterface({ threadId, onNewThread }: ChatInterfaceProps) {
       if (!reader) throw new Error('No reader available')
 
       let fullContent = ''
+      let usedModel = selectedModel
+      let buffer = ''
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n')
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        // Keep incomplete last line in buffer
+        buffer = lines.pop() || ''
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
+          if (!line.startsWith('data: ')) continue
+          try {
             const data = JSON.parse(line.slice(6))
-            if (data.content) {
-              fullContent += data.content
-              setMessages(prev =>
-                prev.map(msg =>
-                  msg.id === assistantMessage.id
-                    ? { ...msg, content: fullContent }
-                    : msg
+
+            switch (data.type) {
+              case 'token':
+                fullContent += data.content
+                setMessages(prev =>
+                  prev.map(msg =>
+                    msg.id === assistantId
+                      ? { ...msg, content: fullContent }
+                      : msg
+                  )
                 )
-              )
+                break
+
+              case 'tool_start':
+                fullContent += `\n[Using tool: ${data.tool}...]\n`
+                setMessages(prev =>
+                  prev.map(msg =>
+                    msg.id === assistantId
+                      ? { ...msg, content: fullContent }
+                      : msg
+                  )
+                )
+                break
+
+              case 'tool_end':
+                fullContent = fullContent.replace(
+                  `\n[Using tool: ${data.tool}...]\n`,
+                  `\n[Tool ${data.tool} completed]\n`
+                )
+                setMessages(prev =>
+                  prev.map(msg =>
+                    msg.id === assistantId
+                      ? { ...msg, content: fullContent }
+                      : msg
+                  )
+                )
+                break
+
+              case 'message':
+                if (data.role === 'ai' || data.role === 'assistant') {
+                  fullContent = typeof data.content === 'string'
+                    ? data.content
+                    : fullContent
+                  setMessages(prev =>
+                    prev.map(msg =>
+                      msg.id === assistantId
+                        ? { ...msg, content: fullContent }
+                        : msg
+                    )
+                  )
+                }
+                break
+
+              case 'done':
+                if (data.selectedModel) usedModel = data.selectedModel
+                break
+
+              case 'error':
+                throw new Error(data.error)
             }
+          } catch {
+            // Skip unparseable lines
           }
         }
       }
+
+      // Save assistant message to DB
+      if (fullContent) {
+        saveMessage(tid!, 'assistant', fullContent, usedModel)
+      }
     } catch (error) {
       console.error('Error sending message:', error)
+      const errMsg = error instanceof Error ? error.message : 'Unknown error'
       setMessages(prev =>
         prev.map(msg =>
-          msg.id === assistantMessage.id
-            ? {
-                ...msg,
-                content: 'Error: Failed to get response. Please try again.',
-              }
+          msg.id === assistantId
+            ? { ...msg, content: `Error: ${errMsg}. Please try again.` }
             : msg
         )
       )
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [activeThreadId, messages, selectedModel, isLoading, createThread])
 
   const handleClearChat = () => {
     setMessages([])
+    setActiveThreadId(null)
+    onNewThread?.()
   }
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex-1 overflow-hidden">
-        <MessageList messages={messages} />
+    <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
+      {/* Header with model selector */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-sm font-medium text-gray-600 dark:text-gray-400">
+          {activeThreadId ? 'Chat' : 'New Chat'}
+        </h2>
+        <ModelSelector value={selectedModel} onChange={setSelectedModel} />
       </div>
-      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+
+      {/* Messages */}
+      <div className="flex-1 overflow-hidden">
+        <MessageList messages={messages} isLoading={isLoading} />
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-gray-200 dark:border-gray-700">
         <MessageInput
           onSend={handleSendMessage}
           onClear={handleClearChat}
-          disabled={messages.length === 0}
+          disabled={isLoading}
         />
       </div>
     </div>
