@@ -250,7 +250,7 @@ export function ChatInterface({ threadId, onNewThread, onThreadCreated }: ChatIn
   return (
     <div className="flex flex-col flex-1 min-h-0 bg-surface-0">
       {/* Model selector bar */}
-      <div className="shrink-0 flex items-center justify-center px-6 py-3 border-b border-white/5">
+      <div className="shrink-0 flex items-center justify-center px-6 py-4 border-b border-white/5">
         <ModelSelector value={selectedModel} onChange={setSelectedModel} />
       </div>
 

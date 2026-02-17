@@ -8,17 +8,17 @@ interface AssistantMessageProps {
 
 export function AssistantMessage({ message }: AssistantMessageProps) {
   return (
-    <div className="flex justify-start gap-3">
-      <div className="shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center mt-0.5 shadow-sm shadow-brand-500/20">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <div className="flex justify-start gap-4">
+      <div className="shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center mt-0.5 shadow-sm shadow-brand-500/20">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
           <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
         </svg>
       </div>
       <div className="max-w-[80%] min-w-0">
-        <div className="bg-surface-2 px-4 py-3 rounded-2xl rounded-tl-md border border-white/5">
+        <div className="bg-surface-2 px-5 py-3.5 rounded-2xl rounded-tl-md border border-white/5">
           {message.content ? (
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary">
+            <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-text-primary">
               {message.content}
             </p>
           ) : (

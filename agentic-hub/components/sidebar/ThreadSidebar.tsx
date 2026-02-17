@@ -63,7 +63,7 @@ export function ThreadSidebar({
       </div>
 
       {/* Thread list */}
-      <div className="flex-1 overflow-y-auto px-2 pb-2">
+      <div className="flex-1 overflow-y-auto px-3 pb-3">
         {loading ? (
           <div className="px-3 py-8 text-center">
             <div className="w-5 h-5 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin mx-auto mb-2" />
@@ -75,25 +75,25 @@ export function ThreadSidebar({
             <p className="text-xs text-text-muted mt-1">Start a conversation</p>
           </div>
         ) : (
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {threads.map(thread => (
               <div
                 key={thread.id}
                 onClick={() => onThreadSelect(thread.id)}
-                className={`group flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 ${
+                className={`group flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-150 ${
                   currentThreadId === thread.id
                     ? 'bg-brand-600/15 text-text-primary'
                     : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
                 }`}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-40">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-40">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate">
                     {thread.title || 'New Thread'}
                   </p>
-                  <p className="text-[10px] text-text-muted mt-0.5">
+                  <p className="text-[11px] text-text-muted mt-1">
                     {new Date(thread.created_at).toLocaleDateString(undefined, {
                       month: 'short',
                       day: 'numeric',
@@ -107,9 +107,9 @@ export function ThreadSidebar({
                     e.stopPropagation()
                     handleDeleteThread(thread.id)
                   }}
-                  className="opacity-0 group-hover:opacity-100 p-1 rounded text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-all"
+                  className="opacity-0 group-hover:opacity-100 p-2 rounded-lg text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-all"
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="3 6 5 6 21 6" />
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                   </svg>
