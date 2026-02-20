@@ -68,6 +68,20 @@ export default function HomePage() {
               Monitoring
             </span>
           </Link>
+          <Link
+            href="/intel"
+            className="w-full sm:w-auto px-12 py-5 glass text-text-secondary text-lg font-semibold rounded-2xl transition-all duration-300 hover:text-text-primary hover:border-brand-500/30 hover:-translate-y-1 active:translate-y-0"
+          >
+            <span className="flex items-center justify-center gap-3">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+                <line x1="12" y1="2" x2="12" y2="12" />
+              </svg>
+              Intel Feed
+            </span>
+          </Link>
         </div>
 
         {/* Feature pills */}
@@ -77,6 +91,7 @@ export default function HomePage() {
             { icon: '⚡', label: 'Next.js 16' },
             { icon: '🗄️', label: 'Supabase' },
             { icon: '🔀', label: 'Multi-Model' },
+            { icon: '🔍', label: 'Squadron' },
           ].map((item) => (
             <span
               key={item.label}
