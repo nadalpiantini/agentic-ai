@@ -1,0 +1,250 @@
+{
+  "current_month": "2026-02",
+  "domains": {
+    "apap.com.do": {
+      "monthly_count": 2,
+      "total_scans": 2,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "banreservas.com.do": {
+      "monthly_count": 2,
+      "total_scans": 2,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "bhd.com.do": {
+      "monthly_count": 2,
+      "total_scans": 2,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "scotiabank.com.do": {
+      "monthly_count": 2,
+      "total_scans": 2,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "bancolopezdeharo.com.do": {
+      "monthly_count": 2,
+      "total_scans": 2,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "bancosantacruz.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.176571+00:00",
+      "last_findings": 0
+    },
+    "bancopromerica.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.176571+00:00",
+      "last_findings": 0
+    },
+    "adopem.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.176571+00:00",
+      "last_findings": 0
+    },
+    "bancocaribe.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.176571+00:00",
+      "last_findings": 0
+    },
+    "asociacionlanacional.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.176571+00:00",
+      "last_findings": 0
+    },
+    "tpago.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.176571+00:00",
+      "last_findings": 0
+    },
+    "cardnet.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.176571+00:00",
+      "last_findings": 0
+    },
+    "azul.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.176571+00:00",
+      "last_findings": 0
+    },
+    "viva.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.176571+00:00",
+      "last_findings": 0
+    },
+    "altice.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.176571+00:00",
+      "last_findings": 0
+    },
+    "claro.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "windtelecom.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "nacional.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "jumbo.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "sirena.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "ccn.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "pricesmart.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "corotos.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "gfrg.com": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "ogtic.gob.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "dgii.gov.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "lacolonial.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "segurosuniversal.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "segurospatria.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "mapfre.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T18:44:51.177499+00:00",
+      "last_findings": 0
+    },
+    "arshumano.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "arspalic.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "hfrg.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "gruporescue.com": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "intec.edu.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "pucmm.edu.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "unibe.edu.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "listindiario.com": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "diariolibre.com": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    },
+    "cdn.com.do": {
+      "monthly_count": 1,
+      "total_scans": 1,
+      "last_scanned": "2026-02-20T19:43:16.510701+00:00",
+      "last_findings": 0
+    }
+  },
+  "stats": {
+    "total_runs": 3,
+    "total_findings": 62,
+    "total_sprints": 3
+  }
+}
