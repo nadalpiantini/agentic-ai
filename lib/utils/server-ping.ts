@@ -1,9 +1,10 @@
 /**
- * Returns the current server timestamp as an ISO string.
- * Useful for ping checks and server-side time synchronization.
+ * Returns the current server timestamp as an ISO 8601 string.
+ * Useful for ping checks, health checks, server-side time synchronization, and verifying server connectivity.
  *
  * @returns The current UTC timestamp in ISO 8601 format (e.g., "2025-02-22T10:30:00.000Z")
  */
 export function getServerTimestamp(): string {
   return new Date().toISOString();
 }
+
