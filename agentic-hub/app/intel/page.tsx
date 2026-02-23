@@ -74,8 +74,19 @@ export default function IntelPage() {
           Squadron Intel Feed
         </span>
 
-        {/* Right side: refresh + spacer */}
+        {/* Right side: targets link + refresh */}
         <div className="flex items-center gap-2">
+          <Link
+            href="/intel/targets"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-text-muted hover:text-text-primary hover:bg-white/5 border border-white/5 transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="6" />
+              <circle cx="12" cy="12" r="2" />
+            </svg>
+            Targets
+          </Link>
           <button
             onClick={() => refetch()}
             disabled={isLoading}

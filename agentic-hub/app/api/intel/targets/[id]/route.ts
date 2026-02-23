@@ -65,3 +65,41 @@ export async function PATCH(
     )
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: targetId } = await params
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase types don't resolve Delete generics for intel_targets
+    const { error } = await (supabaseAdmin.from('intel_targets') as any)
+      .delete()
+      .eq('id', targetId)
+
+    if (error) {
+      console.error('[Intel Target DELETE] Database error:', JSON.stringify(error))
+
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Target not found' },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json(
+        { error: 'Failed to delete target' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ deleted: true })
+  } catch (error) {
+    console.error('[Intel Target DELETE] Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete target' },
+      { status: 500 }
+    )
+  }
+}

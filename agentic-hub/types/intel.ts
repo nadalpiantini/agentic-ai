@@ -56,3 +56,17 @@ export interface IntelTarget {
   scan_count: number
   active: boolean
 }
+
+export interface TargetStats {
+  total: number
+  active: number
+  byType: { domain: number; repo: number; api: number }
+  avgScanCount: number
+}
+
+export interface CreateTargetPayload {
+  target_type: 'domain' | 'repo' | 'api'
+  identifier: string
+  category?: string
+  note?: string
+}
