@@ -25,8 +25,8 @@ export async function PATCH(
       )
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase types don't resolve Update generics for intel_targets
-    const { data: target, error } = await (supabaseAdmin.from('intel_targets') as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase types don't resolve Update generics for nrs_targets
+    const { data: target, error } = await (supabaseAdmin.from('nrs_targets') as any)
       .update({ active: body.active })
       .eq('id', targetId)
       .select()
@@ -73,8 +73,8 @@ export async function DELETE(
   try {
     const { id: targetId } = await params
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase types don't resolve Delete generics for intel_targets
-    const { error } = await (supabaseAdmin.from('intel_targets') as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase types don't resolve Delete generics for nrs_targets
+    const { error } = await (supabaseAdmin.from('nrs_targets') as any)
       .delete()
       .eq('id', targetId)
 

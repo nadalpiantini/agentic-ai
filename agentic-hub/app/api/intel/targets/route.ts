@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(Number(searchParams.get('limit')) || 100, 500)
 
     let query = supabaseAdmin
-      .from('intel_targets')
+      .from('nrs_targets')
       .select('*')
       .order('discovered_at', { ascending: false })
       .limit(limit)
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 
     // Check for duplicate identifier
     const { data: existing } = await supabaseAdmin
-      .from('intel_targets')
+      .from('nrs_targets')
       .select('id')
       .eq('identifier', identifier)
       .limit(1)
@@ -99,8 +99,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase types don't resolve Insert generics for intel_targets
-    const { data: target, error } = await (supabaseAdmin.from('intel_targets') as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase types don't resolve Insert generics for nrs_targets
+    const { data: target, error } = await (supabaseAdmin.from('nrs_targets') as any)
       .insert({
         target_type,
         identifier,
