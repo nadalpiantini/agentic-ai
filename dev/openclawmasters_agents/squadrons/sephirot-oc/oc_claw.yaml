@@ -1,0 +1,47 @@
+project: sephirot-oc
+name: Sephirot Agent OC — Global Intelligence Squadron
+version: "0.1"
+
+mode: scheduled
+loop: daily
+entrypoint: oc_runner.py
+
+agents:
+  - oc_commander
+  - oc_scanner
+  - oc_signal_filter
+  - oc_ranker
+  - oc_email_synth
+
+pipeline:
+  stages:
+    - name: scan
+      agent: oc_scanner
+      description: Execute Tavily queries per country x industry
+    - name: filter
+      agent: oc_signal_filter
+      description: Remove noise, duplicates, clickbait
+    - name: rank
+      agent: oc_ranker
+      description: Score OpportunityScore + ConfidenceScore
+    - name: synthesize
+      agent: oc_email_synth
+      description: Compose and send daily brief email
+
+rate_limits:
+  max_queries_per_day: 200
+  max_llm_calls_per_day: 25
+  query_delay_seconds: 0.5
+
+budget:
+  monthly_tavily_queries: 6000
+  monthly_llm_calls: 600
+  monthly_cost_usd: 75.00
+
+heartbeat:
+  enabled: true
+  schedule: daily 8am AST
+
+governor:
+  auto_approve: true
+  note: Intelligence brief auto-sends (no manual approval needed)

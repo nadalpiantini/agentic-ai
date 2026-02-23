@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "settings": {
+    "max_queries_per_day": 200,
+    "query_delay_seconds": 0.5,
+    "tavily_search_depth": "basic",
+    "tavily_max_results": 5,
+    "signal_max_age_hours": 72,
+    "recency_preference": "week"
+  },
+  "industries": [
+    {
+      "id": "banking",
+      "name": "Banking & Finance",
+      "mainstream_queries": [
+        "{country} banking regulation policy changes 2026",
+        "{country} major bank earnings merger acquisition",
+        "{country} central bank interest rate decision",
+        "{country} fintech disruption digital banking",
+        "{country} banking sector market analysis"
+      ],
+      "niche_queries": [
+        "{country} CBDC digital currency pilot launch",
+        "{country} bank infrastructure outage cybersecurity",
+        "{country} open banking API fintech partnership",
+        "{country} microfinance lending emerging market opportunity",
+        "{country} banking sanctions compliance enforcement"
+      ]
+    },
+    {
+      "id": "technology",
+      "name": "Technology & AI",
+      "mainstream_queries": [
+        "{country} artificial intelligence regulation policy",
+        "{country} tech company earnings revenue growth",
+        "{country} semiconductor chip supply chain",
+        "{country} cloud computing data center expansion",
+        "{country} technology sector investment funding"
+      ],
+      "niche_queries": [
+        "{country} AI startup funding seed round",
+        "{country} open source AI model release",
+        "{country} tech talent immigration policy",
+        "{country} quantum computing breakthrough research",
+        "{country} edge computing IoT deployment"
+      ]
+    },
+    {
+      "id": "energy",
+      "name": "Energy & Commodities",
+      "mainstream_queries": [
+        "{country} oil gas production output change",
+        "{country} renewable energy solar wind investment",
+        "{country} energy policy regulation transition",
+        "{country} commodity prices trading market",
+        "{country} electricity grid infrastructure"
+      ],
+      "niche_queries": [
+        "{country} lithium mining battery supply chain",
+        "{country} hydrogen fuel cell pilot project",
+        "{country} energy storage battery technology",
+        "{country} carbon credit trading market",
+        "{country} small modular nuclear reactor SMR"
+      ]
+    },
+    {
+      "id": "realestate",
+      "name": "Real Estate & Construction",
+      "mainstream_queries": [
+        "{country} real estate market prices forecast",
+        "{country} commercial property vacancy rates",
+        "{country} housing construction permits building",
+        "{country} REIT real estate investment returns",
+        "{country} mortgage rates lending market"
+      ],
+      "niche_queries": [
+        "{country} proptech startup real estate technology",
+        "{country} affordable housing development subsidy",
+        "{country} industrial warehouse logistics demand",
+        "{country} co-living co-working space expansion",
+        "{country} real estate tokenization blockchain"
+      ]
+    }
+  ],
+  "rotation": {
+    "hot": {
+      "frequency": "daily",
+      "countries": ["US", "CN", "UK", "JP", "DE"],
+      "industries_per_country": 4
+    },
+    "warm": {
+      "frequency": "every_2_days",
+      "countries": ["BR", "IN", "AU", "CA", "FR", "KR", "SG", "AE"],
+      "industries_per_country": 3
+    },
+    "cool": {
+      "frequency": "every_3_days",
+      "countries": ["MX", "CO", "CL", "AR", "ID", "TH", "VN", "NG", "KE", "ZA"],
+      "industries_per_country": 2
+    }
+  },
+  "country_names": {
+    "US": "United States",
+    "CN": "China",
+    "UK": "United Kingdom",
+    "JP": "Japan",
+    "DE": "Germany",
+    "BR": "Brazil",
+    "IN": "India",
+    "AU": "Australia",
+    "CA": "Canada",
+    "FR": "France",
+    "KR": "South Korea",
+    "SG": "Singapore",
+    "AE": "United Arab Emirates",
+    "MX": "Mexico",
+    "CO": "Colombia",
+    "CL": "Chile",
+    "AR": "Argentina",
+    "ID": "Indonesia",
+    "TH": "Thailand",
+    "VN": "Vietnam",
+    "NG": "Nigeria",
+    "KE": "Kenya",
+    "ZA": "South Africa"
+  }
+}

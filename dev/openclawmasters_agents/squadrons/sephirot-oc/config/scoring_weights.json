@@ -1,0 +1,22 @@
+{
+  "opportunity": {
+    "economic_impact": 0.30,
+    "timing_advantage": 0.25,
+    "information_asymmetry": 0.25,
+    "actionability": 0.20
+  },
+  "confidence": {
+    "cross_source_validation": 0.40,
+    "source_authority": 0.25,
+    "evidence_quality": 0.20,
+    "historical_consistency": 0.15
+  },
+  "thresholds": {
+    "top_opportunity_min": 25,
+    "watchlist_min": 15,
+    "top_confidence_min": 40,
+    "watchlist_confidence_min": 30,
+    "max_top_signals": 15,
+    "max_email_signals": 35
+  }
+}
