@@ -1,0 +1,19 @@
+SEPHIROT-OC SQUADRON
+====================
+Version: 1.0.0
+Build: 2026-02-25
+Status: PRODUCTION READY
+
+Changelog:
+- Fixed LLM executive summary (agents.llm import)
+- New importlib system to avoid agents/ namespace collision
+- Absolute paths for project root reliability
+- Tested: 200 signals → 168 filtered → 3 top + 10 watchlist
+- Email delivery verified
+
+Dependencies:
+- Python 3.9+
+- ~/dev/openclawmasters_agents/agents/llm.py
+- ~/.freejack-credentials.env (TAVILY_API_KEY)
+- ~/.openclaw/config/email_global.json (optional)
+

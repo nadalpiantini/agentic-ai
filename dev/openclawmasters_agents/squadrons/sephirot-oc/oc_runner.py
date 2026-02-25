@@ -41,10 +41,34 @@ def _load_credentials():
 
 _load_credentials()
 
-# Ensure agents/ is importable
-sys.path.insert(0, str(Path(__file__).parent))
+# Ensure project root is in sys.path for agents.llm import
+# Use absolute path to avoid relative resolution issues
+SQUADRON_ROOT = Path(__file__).parent.resolve()
+PROJECT_ROOT = Path("/Users/anp/dev/openclawmasters_agents")  # Absolute path for reliability
+sys.path.insert(0, str(PROJECT_ROOT))
 
-from agents.oc_commander import run_pipeline, heartbeat, status
+# Import local agents directly to avoid agents/ namespace collision
+# The project has agents/llm.py, the squadron has agents/oc_commander.py
+import importlib.util
+
+def _import_local_agent(name):
+    """Import a local agent file from squadron/agents/"""
+    spec = importlib.util.spec_from_file_location(f"sephirot_oc_{name}", SQUADRON_ROOT / "agents" / f"{name}.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[f'sephirot_oc_{name}'] = module
+    spec.loader.exec_module(module)
+    return module
+
+# Import all required local agents
+oc_commander = _import_local_agent('oc_commander')
+oc_scanner = _import_local_agent('oc_scanner')
+oc_signal_filter = _import_local_agent('oc_signal_filter')
+oc_ranker = _import_local_agent('oc_ranker')
+oc_email_synth = _import_local_agent('oc_email_synth')
+
+run_pipeline = oc_commander.run_pipeline
+heartbeat = oc_commander.heartbeat
+status = oc_commander.status
 
 
 LOG_DIR = Path.home() / ".openclaw" / "squadrons" / "sephirot-oc" / "logs"

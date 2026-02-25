@@ -19,8 +19,8 @@ HEARTBEAT_LOG_DIR = SQUADRON_DIR / "logs"
 MEMORY_DIR = Path(__file__).parent.parent / "memory"
 STORE_FILE = MEMORY_DIR / "oc_store.json"
 
-# Add project root for llm import
-_PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+# Add project root for llm import (absolute path for reliability)
+_PROJECT_ROOT = Path("/Users/anp/dev/openclawmasters_agents")
 sys.path.insert(0, str(_PROJECT_ROOT))
 
 
@@ -112,9 +112,11 @@ def run_pipeline(countries=None):
     Returns:
         Pipeline run log dict.
     """
-    from agents.oc_scanner import run as scan
-    from agents.oc_signal_filter import run as filter_signals
-    from agents.oc_ranker import run as rank
+    # Import agent modules (loaded by runner via importlib)
+    import sys
+    scan = sys.modules['sephirot_oc_oc_scanner'].run
+    filter_signals = sys.modules['sephirot_oc_oc_signal_filter'].run
+    rank = sys.modules['sephirot_oc_oc_ranker'].run
 
     state = _load_state()
 
@@ -199,7 +201,7 @@ def run_pipeline(countries=None):
     # Stage 4: Email
     print(f"\n[4/4] Composing daily brief...")
     try:
-        from agents.oc_email_synth import run as email_synth
+        email_synth = sys.modules['sephirot_oc_oc_email_synth'].run
         email_result = email_synth(ranked, scan_stats)
         run_log["email_sent"] = email_result.get("email_sent", False)
     except Exception as e:

@@ -18,8 +18,8 @@ from pathlib import Path
 EMAIL_CONFIG_PATH = Path.home() / ".openclaw" / "config" / "email_global.json"
 BRIEFS_DIR = Path(__file__).parent.parent / "briefs"
 
-# Add project root for llm import
-_PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+# Add project root for llm import (absolute path for reliability)
+_PROJECT_ROOT = Path("/Users/anp/dev/openclawmasters_agents")
 sys.path.insert(0, str(_PROJECT_ROOT))
 
 
